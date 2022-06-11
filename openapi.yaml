@@ -1,0 +1,501 @@
+openapi: 3.0.0
+info:
+  description: "This is the CHAI backend used to provide energy information to the UI, and allow user interaction initiated through the UI."
+  version: "1.0.0"
+  title: "CHAI backend"
+  
+servers:
+  - url: https://api.project-chai.org
+    description: Main production server
+  - url: http://94.237.63.158
+    description: Temporary static IP test server
+    
+security:
+  - bearer_auth: []
+  
+tags:
+- name: "heating"
+  description: "Get and set heating properties of the home."
+- name: "battery"
+  description: "Get and set battery properties of the home."
+- name: "electricity"
+  description: "Get information about electricity prices and usage."
+
+paths:
+  /heating/mode:
+    summary: "Retrieve or change the setpoint mode and temperature of the home."
+    description: ""
+      
+    get:
+      tags:
+        - heating
+      responses:
+        '200':
+          description: "The current setpoint mode and temperature of the home."
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HeatingMode'
+        '400':
+          description: "The provided label is invalid."
+        '401':
+          description: "The bearer token is not provided or is invalid."
+        '500':
+          description: "The server experience an internal error."
+      summary: "Get the current setpoint mode and temperature of the home."
+      description: ""
+      operationId: "getHeatingMode"
+      parameters:
+        - name: label
+          in: query
+          description: "The unique label of the home for which you are requesting the temperature."
+          required: true
+          schema:
+            type: string
+            
+    put:
+      tags:
+        - heating
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: >
+            The provided label is invalid, or
+            the temperature is not a number within the range [7, 30].
+        '401':
+          description: "The bearer token is not provided or is invalid."
+        '500':
+          description: "The server experience an internal error."
+      summary: "Change the setpoint mode (and target temperature) of the home."
+      description: ""
+      operationId: "setHeatingMode"
+      parameters:
+        - name: label
+          in: query
+          description: "The unique label of the home for which you are requesting the temperature."
+          required: true
+          schema:
+            type: string
+        - name: mode
+          in: query
+          description: "The current mode."
+          required: true
+          schema:
+            type: string
+            enum: [auto, on, off]
+        - name: target
+          in: query
+          description: "The desired temperature in auto mode."
+          required: false
+          schema:
+            type: number
+            minimum: 7
+            maximum: 30
+            
+  /heating/valve:
+    get:
+      tags:
+        - heating
+      responses:
+        '200':
+          description: "The current valve status."
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValveStatus'
+        '400':
+          description: "The provided label is invalid."
+        '401':
+          description: "The bearer token is not provided or is invalid."
+        '500':
+          description: "The server experience an internal error."
+      summary: "Get the current valve status."
+      description: ""
+      operationId: "getValveStatus"
+      parameters:
+        - name: label
+          in: query
+          description: "The unique label of the home for which you are requesting the valve status."
+          required: true
+          schema:
+            type: string
+            
+  /battery/mode:
+    summary: "Retrieve or change the battery mode and status of the home."
+    description: ""
+      
+    get:
+      tags:
+        - battery
+      responses:
+        '200':
+          description: "The current battery mode and status."
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatteryMode'
+        '400':
+          description: "The provided label is invalid."
+        '401':
+          description: "The bearer token is not provided or is invalid."
+        '500':
+          description: "The server experience an internal error."
+      summary: "Get the current battery mode and status."
+      description: ""
+      operationId: "getBatteryMode"
+      parameters:
+        - name: label
+          in: query
+          description: "The unique label of the home for which you are requesting the battery mode and status."
+          required: true
+          schema:
+            type: string
+            
+    put:
+      tags:
+        - battery
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: >
+            The provided label is invalid.
+        '401':
+          description: "The bearer token is not provided or is invalid."
+        '500':
+          description: "The server experience an internal error."
+      summary: "Change the battery mode."
+      description: ""
+      operationId: "setBatteryMode"
+      parameters:
+        - name: label
+          in: query
+          description: "The unique label of the home for which you are changing the battery mode."
+          required: true
+          schema:
+            type: string
+        - name: mode
+          in: query
+          description: "The desired battery mode."
+          required: true
+          schema:
+            type: string
+            enum: [auto, charge, discharge, off]
+            
+  /electricity/current:
+    summary: "The current power usage in the home."
+    description: ""
+    get:
+      tags:
+        - electricity
+      responses:
+        '200':
+          description: "The current power usage expressed in W (watts)."
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsageStatus'
+        '400':
+          description: "The provided label is invalid."
+        '401':
+          description: "The bearer token is not provided or is invalid."
+        '500':
+          description: "The server experience an internal error."
+        '503':
+          description: "The current usage cannot be retrieved."
+      summary: "Get the current power usage in the home."
+      description: ""
+      operationId: "getCurrent"
+      parameters:
+        - name: label
+          in: query
+          description: "The unique label of the home for which you are requesting the power usage."
+          required: true
+          schema:
+            type: string
+            
+  /electricity/prices:
+    get:
+      tags:
+        - electricity
+      responses:
+        '200':
+          description: "Returns a list of import or export rates with each rate expressed in p/kWh."
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Rate'
+        '400':
+          description: >
+            Either the start or end date is not a valid ISO8601 date,
+            only an end date was provided without specifying a start date,
+            or the limit is less than 1.
+        '401':
+          description: "The bearer token is not provided or is invalid."
+        '500':
+          description: "The server experience an internal error."
+      summary: "Get the current import/export rate and all upcoming import/export rates, or get the import/export rate from another starting point by adding a start parameter, or get import/export rates within a defined range by adding both a start and end parameter."
+      description: ""
+      operationId: "getPrices"
+      parameters:
+        - name: start
+          in: query
+          description: 'AN ISO8601 date indicating the start (inclusive) of the interval. The accepted format is ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2})?(?:([+-]\d\d:\d\d)|Z)?$'
+          required: false
+          schema:
+            type: string
+        - name: end
+          in: query
+          description: 'AN ISO8601 date indicating the end (exclusive) of the interval. The accepted format is ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2})?(?:([+-]\d\d:\d\d)|Z)?$'
+          required: false
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: 'The maximum number of import/export rates to return. The number of returned entries is counted from start (if specified) or current time.'
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+        - name: export
+          in: query
+          description: 'Flag to indicate whether the export prices should be retrieved. Defaults to false when omitted.'
+          required: false
+          schema:
+            type: boolean
+            
+  /electricity/consumption:
+    get:
+      tags:
+        - electricity
+      responses:
+        '200':
+          description: "Returns a list of the consumption of a home expressed in kWh."
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Consumption'
+        '400':
+          description: >
+            The provided label is invalid,
+            the provided type is invalid,
+            either the start or end date is not a valid ISO8601 date,
+            only an end date was provided without specifying a start date,
+            or the limit is less than 1.
+        '401':
+          description: "The bearer token is not provided or is invalid."
+        '500':
+          description: "The server experience an internal error."
+      summary: "Get the expected upcoming consumption values, or get the consumption values from another starting point by adding a start parameter, or get consumption values within a defined range by adding both a start and end parameter."
+      description: ""
+      operationId: "getConsumption"
+      parameters:
+        - name: label
+          in: query
+          description: "The unique label of the home for which you are requesting the consumption."
+          required: true
+          schema:
+            type: string
+        - name: target
+          in: query
+          description: "The target/device for which we want to get the consumption."
+          required: true
+          schema:
+            type: string
+            enum: ["total", "radiator", "battery", "other"]
+        - name: start
+          in: query
+          description: 'AN ISO8601 date indicating the start (inclusive) of the interval. The accepted format is ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2})?(?:([+-]\d\d:\d\d)|Z)?$'
+          required: false
+          schema:
+            type: string
+        - name: end
+          in: query
+          description: 'AN ISO8601 date indicating the end (exclusive) of the interval. The accepted format is ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2})?(?:([+-]\d\d:\d\d)|Z)?$'
+          required: false
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: 'The maximum number of consumption entries to return. The number of returned entries is counted from the start (if specified) or current time.'
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            
+  /electricity/costs:
+    get:
+      tags:
+        - electricity
+      responses:
+        '200':
+          description: "Returns a list of the costs of a home expressed in £."
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Cost'
+        '400':
+          description: >
+            The provided label is invalid,
+            the provided type is invalid,
+            either the start or end date is not a valid ISO8601 date,
+            only an end date was provided without specifying a start date,
+            or the limit is less than 1.
+        '401':
+          description: "The bearer token is not provided or is invalid."
+        '500':
+          description: "The server experience an internal error."
+      summary: "Get the expected upcoming costs, or get the costs from another starting point by adding a start parameter, or get costs within a defined range by adding both a start and end parameter."
+      description: ""
+      operationId: "getCosts"
+      parameters:
+        - name: label
+          in: query
+          description: "The unique label of the home for which you are requesting the costs."
+          required: true
+          schema:
+            type: string
+        - name: target
+          in: query
+          description: "The target/device for which we want to get the costs."
+          required: true
+          schema:
+            type: string
+            enum: ["total", "radiator", "battery", "other"]
+        - name: start
+          in: query
+          description: 'AN ISO8601 date indicating the start (inclusive) of the interval. The accepted format is ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2})?(?:([+-]\d\d:\d\d)|Z)?$'
+          required: false
+          schema:
+            type: string
+        - name: end
+          in: query
+          description: 'AN ISO8601 date indicating the end (exclusive) of the interval. The accepted format is ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2})?(?:([+-]\d\d:\d\d)|Z)?$'
+          required: false
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: 'The maximum number of cost entries to return. The number of returned entries is counted from the start (if specified) or current time.'
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+  
+components:
+
+  securitySchemes:
+    bearer_auth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    HeatingMode:
+      type: object
+      properties:
+        temperature:
+          type: number
+          description: The current temperature in the room/house.
+          example: 20.5
+        mode:
+          type: string
+          enum: [auto, on, off]
+          example: auto
+        target_temperature:
+          type: number
+          description: The target temperature when in auto mode.
+          nullable: true
+          example: 21
+    
+  
+    ValveStatus:
+      type: object
+      properties:
+        open:
+          type: boolean
+          description: Whether the valve is currently open.
+    
+    UsageStatus:
+      type: object
+      properties:
+        power:
+          type: integer
+          minimum: 0
+          example: 312
+    
+    BatteryMode:
+      type: object
+      properties:
+        mode:
+          type: string
+          enum: [auto, charge, discharge, off]
+        status:
+          type: string
+          enum: [charge, discharge, off]
+        percentage:
+          type: integer
+          minimum: 0
+          maximum: 100
+          example: 71
+    
+    Rate:
+      type: object
+      properties:
+        start: 
+          type: string
+          format: ISO8601
+          example: 2022-04-15T12:00
+        end: 
+          type: string
+          format: ISO8601
+          example: 2022-04-15T12:30
+        rate:
+          type: number
+          example: 13.14
+        predicted:
+          type: boolean
+          example: false
+          
+    Consumption:
+      type: object
+      properties:
+        start: 
+          type: string
+          format: ISO8601
+          example: 2022-04-15T12:00
+        end: 
+          type: string
+          format: ISO8601
+          example: 2022-04-15T12:30
+        consumption:
+          type: number
+          example: 0.156
+        predicted:
+          type: boolean
+          example: false
+          
+    Cost:
+      type: object
+      properties:
+        start: 
+          type: string
+          format: ISO8601
+          example: 2022-04-15T12:00
+        end: 
+          type: string
+          format: ISO8601
+          example: 2022-04-15T12:30
+        cost:
+          type: number
+          example: 0.31
+        predicted:
+          type: boolean
+          example: false
