@@ -71,8 +71,8 @@ class ValveResource:
             request: HeatingGet = from_dict(HeatingGet, req.params)
             try:
                 resp.content_type = falcon.MEDIA_JSON
-                # TODO: implement actual valve status
-                resp.text = json.dumps(ValveStatus(open=False))
+                status = Homes().get_valve_status(request.label)
+                resp.text = json.dumps(ValveStatus(open=status))
                 resp.status = falcon.HTTP_OK
             except NetatmoError:
                 resp.status = falcon.HTTP_INTERNAL_SERVER_ERROR
