@@ -19,8 +19,8 @@ setup(
                       "ujson",  # fast JSON encoder and decoder
                       "falcon",  # fast web framework
                       "bjoern",  # fast WSGI server
-                      # chai-data-sources
-                      # chai-persistence
+                      # "chai-data-sources",
+                      # "chai-persistence",
                       ],
     classifiers=[],
     include_package_data=True,
