@@ -28,8 +28,8 @@ class HeatingResource:
                 temperature = Homes().get_temperature(request.label, DeviceType.VALVE)
                 valve = Homes().get_valve_status(request.label)
                 if temperature is None:
-                    resp.content_type = falcon.MEDIA_TEXT
                     resp.status = falcon.HTTP_BAD_REQUEST
+                    resp.content_type = falcon.MEDIA_TEXT
                     resp.text = "unknown home label"
                     return
                 resp.content_type = falcon.MEDIA_JSON
@@ -39,8 +39,12 @@ class HeatingResource:
                 resp.status = falcon.HTTP_OK
             except NetatmoError:
                 resp.status = falcon.HTTP_INTERNAL_SERVER_ERROR
+                resp.content_type = falcon.MEDIA_TEXT
+                resp.text = "unable to retrieve information from the device"
         except DaciteError:
             resp.status = falcon.HTTP_BAD_REQUEST
+            resp.content_type = falcon.MEDIA_TEXT
+            resp.text = f"the request is not understood: {req.params}"
 
     @bearer_authentication(config.secret)
     def on_put(self, req: Request, resp: Response):  # noqa
