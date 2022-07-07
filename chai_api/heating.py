@@ -25,7 +25,8 @@ class HeatingResource:
         try:
             request: HeatingGet = from_dict(HeatingGet, req.params)
             try:
-                temperature = Homes().get_temperature(request.label, DeviceType.THERMOSTAT)
+                temperature = Homes().get_temperature(request.label, DeviceType.VALVE)
+                valve = Homes().get_valve_status(request.label)
                 if temperature is None:
                     resp.content_type = falcon.MEDIA_TEXT
                     resp.status = falcon.HTTP_BAD_REQUEST
@@ -34,7 +35,7 @@ class HeatingResource:
                 resp.content_type = falcon.MEDIA_JSON
                 # TODO: hard-coded mode
                 # TODO: hard-coded target
-                resp.text = json.dumps(HeatingMode(temperature, HeatingModeOption.AUTO, target=25).to_dict())
+                resp.text = json.dumps(HeatingMode(temperature, HeatingModeOption.AUTO, valve, target=25).to_dict())
                 resp.status = falcon.HTTP_OK
             except NetatmoError:
                 resp.status = falcon.HTTP_INTERNAL_SERVER_ERROR

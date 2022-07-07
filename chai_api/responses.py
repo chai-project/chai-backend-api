@@ -29,12 +29,14 @@ class HeatingModeOption(Enum):
 class HeatingMode:
     temperature: float
     mode: HeatingModeOption
+    valve: bool
     target: Optional[float]
 
     def to_dict(self):
         values = {
             "temperature": self.temperature,
             "mode": self.mode.value,
+            "valve_open": self.valve,
         }
         if self.target is not None:
             values["target_temperature"] = self.target
