@@ -43,7 +43,11 @@ class HeatingResource:
                 resp.status = falcon.HTTP_INTERNAL_SERVER_ERROR
         except DaciteError:
             resp.content_type = falcon.MEDIA_TEXT
-            resp.text = f"the request is not understood: {req.params}"
+            if req.params:
+                params = ",".join("=".join((key,val)) for (key,val) in req.params.items())
+                resp.text = f"the request is not understood; received parameters {params}"
+            else:
+                resp.text = f"the request is not understood; expected parameters but none given"
             resp.status = falcon.HTTP_BAD_REQUEST
 
     @bearer_authentication(config.secret)
