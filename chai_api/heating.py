@@ -34,7 +34,7 @@ class HeatingResource:
                 resp.content_type = falcon.MEDIA_JSON
                 # TODO: hard-coded mode
                 # TODO: hard-coded target
-                resp.text = json.dumps(HeatingMode(temperature, HeatingModeOption.ON, target=None))
+                resp.text = json.dumps(HeatingMode(temperature, HeatingModeOption.AUTO, target=25).to_dict())
                 resp.status = falcon.HTTP_OK
             except NetatmoError:
                 resp.status = falcon.HTTP_INTERNAL_SERVER_ERROR
@@ -72,7 +72,7 @@ class ValveResource:
             try:
                 resp.content_type = falcon.MEDIA_JSON
                 status = Homes().get_valve_status(request.label)
-                resp.text = json.dumps(ValveStatus(open=status))
+                resp.text = json.dumps(ValveStatus(open=status).to_dict())
                 resp.status = falcon.HTTP_OK
             except NetatmoError:
                 resp.status = falcon.HTTP_INTERNAL_SERVER_ERROR
