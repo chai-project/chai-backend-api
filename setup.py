@@ -18,10 +18,13 @@ setup(
                       "dacite",  # convert dictionaries to dataclass instances
                       "ujson",  # fast JSON encoder and decoder
                       "falcon",  # fast web framework
-                      "bjoern",  # fast WSGI server
                       # "chai-data-sources",
                       # "chai-persistence",
                       ],
+    extras_require={
+        "compat": ["cheroot"],  # pure Python WSGI server
+        "speed": ["bjoern"],  # fast WSGI server
+    },
     classifiers=[],
     include_package_data=True,
     platforms="any",

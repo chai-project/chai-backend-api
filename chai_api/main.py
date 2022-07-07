@@ -5,8 +5,17 @@ from __future__ import annotations
 
 import os
 
-import bjoern
 import falcon
+from falcon import App
+
+try:
+    from bjoern import run as run_server
+except (ImportError, ModuleNotFoundError):
+    from cheroot.wsgi import Server as HTTPServer
+
+    def run_server(app: App, host: str, port: int):
+        HTTPServer((host, port), app).start()
+
 
 from chai_api.battery import BatteryResource
 from chai_api.heating import HeatingResource
@@ -41,4 +50,5 @@ app.add_route("/electricity/current/", CurrentResource())
 app.add_sink(Sink().on_get)  # route all unknown traffic to the sink
 
 print(f"backend server running at {config.host}:{config.port}")
-bjoern.run(app, config.host, config.port, reuse_port=False)
+
+run_server(app, config.host, config.port)
