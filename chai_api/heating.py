@@ -28,9 +28,9 @@ class HeatingResource:
                 temperature = Homes().get_temperature(request.label, DeviceType.VALVE)
                 valve = Homes().get_valve_status(request.label)
                 if temperature is None:
-                    resp.status = falcon.HTTP_BAD_REQUEST
                     resp.content_type = falcon.MEDIA_TEXT
                     resp.text = "unknown home label"
+                    resp.status = falcon.HTTP_BAD_REQUEST
                     return
                 resp.content_type = falcon.MEDIA_JSON
                 # TODO: hard-coded mode
@@ -38,13 +38,13 @@ class HeatingResource:
                 resp.text = json.dumps(HeatingMode(temperature, HeatingModeOption.AUTO, valve, target=25).to_dict())
                 resp.status = falcon.HTTP_OK
             except NetatmoError:
-                resp.status = falcon.HTTP_INTERNAL_SERVER_ERROR
                 resp.content_type = falcon.MEDIA_TEXT
                 resp.text = "unable to retrieve information from the device"
+                resp.status = falcon.HTTP_INTERNAL_SERVER_ERROR
         except DaciteError:
-            resp.status = falcon.HTTP_BAD_REQUEST
             resp.content_type = falcon.MEDIA_TEXT
             resp.text = f"the request is not understood: {req.params}"
+            resp.status = falcon.HTTP_BAD_REQUEST
 
     @bearer_authentication(config.secret)
     def on_put(self, req: Request, resp: Response):  # noqa
@@ -54,13 +54,13 @@ class HeatingResource:
             if request.mode == HeatingModeOption.AUTO:
                 if request.target is None:
                     resp.content_type = falcon.MEDIA_TEXT
-                    resp.status = falcon.HTTP_BAD_REQUEST
                     resp.text = "target temperature expected for auto mode"
+                    resp.status = falcon.HTTP_BAD_REQUEST
                     return
                 if not 7 <= request.target <= 30:
                     resp.content_type = falcon.MEDIA_TEXT
-                    resp.status = falcon.HTTP_BAD_REQUEST
                     resp.text = "target temperature expected between 7 and 30"
+                    resp.status = falcon.HTTP_BAD_REQUEST
                     return
 
                 # TODO: implement PUT /heating/mode
