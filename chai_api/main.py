@@ -30,6 +30,7 @@ class Sink:
 homes = Homes()
 
 # instantiate a callable WSGI app
+# TODO: CORS support should *only* be enabled until the SSL certificates are sorted out
 app = falcon.App(cors_enable=True)
 
 # create routes to resource instances
