@@ -31,7 +31,7 @@ homes = Homes()
 
 # instantiate a callable WSGI app
 # TODO: CORS support should *only* be enabled until the SSL certificates are sorted out
-app = falcon.App(cors_enable=True)
+app = falcon.App(middleware=falcon.CORSMiddleware(allow_origins="*", allow_credentials="*"))
 
 # create routes to resource instances
 app.add_route("/heating/mode/", HeatingResource())
