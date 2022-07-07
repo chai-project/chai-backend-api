@@ -30,14 +30,14 @@ class Sink:
 homes = Homes()
 
 # instantiate a callable WSGI app
-app = falcon.App()
+app = falcon.App(cors_enable=True)
 
 # create routes to resource instances
 app.add_route("/heating/mode/", HeatingResource())
 app.add_route("/battery/mode/", BatteryResource())
 app.add_route("/electricity/prices/", PriceResource())
 app.add_route("/electricity/current/", CurrentResource())
-app.add_sink(Sink().on_get, prefix="/")  # route all unknown traffic to the sink
+app.add_sink(Sink().on_get)  # route all unknown traffic to the sink
 
 print(f"backend server running at {config.host}:{config.port}")
 bjoern.run(app, config.host, config.port, reuse_port=False)
