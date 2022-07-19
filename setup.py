@@ -18,6 +18,7 @@ setup(
                       "dacite",  # convert dictionaries to dataclass instances
                       "ujson",  # fast JSON encoder and decoder
                       "falcon",  # fast web framework
+                      "click", # easy decorator style command line interface
                       # "chai-data-sources",
                       # "chai-persistence",
                       ],

@@ -2,7 +2,6 @@
 # pylint: disable=no-member, c-extension-no-member, too-few-public-methods
 # pylint: disable=missing-class-docstring, missing-function-docstring
 
-import os
 from enum import Enum
 
 import falcon
@@ -13,14 +12,9 @@ from falcon import Request, Response
 
 from chai_api.expected import HeatingGet, HeatingPut
 from chai_api.responses import HeatingMode, HeatingModeOption, ValveStatus
-from chai_api.utilities import bearer_authentication, read_config, Configuration
-
-SCRIPT_PATH: str = os.path.dirname(os.path.realpath(__file__))
-config: Configuration = read_config(SCRIPT_PATH)
 
 
 class HeatingResource:
-    @bearer_authentication(config.secret)
     def on_get(self, req: Request, resp: Response):  # noqa
         try:
             request: HeatingGet = from_dict(HeatingGet, req.params)
@@ -44,13 +38,12 @@ class HeatingResource:
         except DaciteError:
             resp.content_type = falcon.MEDIA_TEXT
             if req.params:
-                params = ",".join("=".join((key,val)) for (key,val) in req.params.items())
+                params = ",".join("=".join((key, val)) for (key, val) in req.params.items())
                 resp.text = f"the request is not understood; received parameters {params}"
             else:
                 resp.text = f"the request is not understood; expected parameters but none given"
             resp.status = falcon.HTTP_BAD_REQUEST
 
-    @bearer_authentication(config.secret)
     def on_put(self, req: Request, resp: Response):  # noqa
         try:
             request: HeatingPut = from_dict(HeatingPut, req.params, config=Config(cast=[Enum]))
@@ -74,7 +67,6 @@ class HeatingResource:
 
 
 class ValveResource:
-    @bearer_authentication(config.secret)
     def on_get(self, req: Request, resp: Response):  # noqa
         try:
             request: HeatingGet = from_dict(HeatingGet, req.params)
