@@ -2,8 +2,6 @@
 # pylint: disable=no-member, c-extension-no-member, too-few-public-methods
 # pylint: disable=missing-class-docstring, missing-function-docstring
 
-import os
-
 import falcon
 import pendulum
 import ujson as json
@@ -13,14 +11,9 @@ from pendulum import DateTime, from_timestamp
 
 from chai_api.expected import PricesGet
 from chai_api.responses import Rate
-from chai_api.utilities import bearer_authentication, read_config, Configuration
-
-SCRIPT_PATH: str = os.path.dirname(os.path.realpath(__file__))
-config: Configuration = read_config(SCRIPT_PATH)
 
 
 class PriceResource:
-    @bearer_authentication(config.secret)
     def on_get(self, req: Request, resp: Response):  # noqa
         try:
             request: PricesGet = from_dict(PricesGet, req.params, config=Config({DateTime: from_timestamp}))

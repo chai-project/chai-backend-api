@@ -7,6 +7,8 @@ import os
 
 import falcon
 from falcon import App
+from falcon_auth import FalconAuthMiddleware, TokenAuthBackend
+import click
 
 try:
     from bjoern import run as run_server
@@ -21,11 +23,10 @@ from chai_api.battery import BatteryResource
 from chai_api.heating import HeatingResource
 from chai_api.prices import PriceResource
 from chai_api.electricity import CurrentResource
-from chai_api.utilities import read_config, Configuration
 from chai_persistence import Homes
 
 SCRIPT_PATH: str = os.path.dirname(os.path.realpath(__file__))
-config: Configuration = read_config(SCRIPT_PATH)
+WD_PATH: str = os.getcwd()
 
 
 class Sink:
@@ -35,20 +36,45 @@ class Sink:
         resp.text = "unknown API endpoint - make sure you did not omit the trailing slash"
 
 
-# start the Homes singleton
-homes = Homes()
+@click.command()
+@click.option("--host", default="0.0.0.0", help="The host where to launch the API server.")
+@click.option("--port", default="8080", help="The port where to launch the API server.")
+@click.option("--bearer_file", default=None, help="The file containing the (single line) bearer token.")
+def cli(host, port, bearer_file):
+    # verify that the bearer file exists
+    if bearer_file and not os.path.isfile(bearer_file):
+        click.echo("Bearer file not found. Please provide a valid file path.")
+        exit(0)
 
-# instantiate a callable WSGI app
-# TODO: handle CORS in Falcon, or through reverse proxy?
-app = falcon.App()
+    bearer = None
+    if bearer_file:
+        # use the contents of the file as the bearer token
+        with open(bearer_file) as f:
+            bearer = f.read().strip()
+    main(host, port, bearer)
 
-# create routes to resource instances
-app.add_route("/heating/mode/", HeatingResource())
-app.add_route("/battery/mode/", BatteryResource())
-app.add_route("/electricity/prices/", PriceResource())
-app.add_route("/electricity/current/", CurrentResource())
-app.add_sink(Sink().on_get)  # route all unknown traffic to the sink
 
-print(f"backend server running at {config.host}:{config.port}")
+def main(host, port, bearer):
+    # start the Homes singleton
+    homes = Homes()
 
-run_server(app, config.host, config.port)
+    # instantiate a callable WSGI app
+    # TODO: handle CORS in Falcon, or through reverse proxy?
+    token_auth = TokenAuthBackend(user_loader=lambda x: True if x == bearer else None, auth_header_prefix="Bearer")
+    auth_middleware = FalconAuthMiddleware(token_auth)
+    app = falcon.App(middleware=[auth_middleware])
+
+    # create routes to resource instances
+    app.add_route("/heating/mode/", HeatingResource())
+    app.add_route("/battery/mode/", BatteryResource())
+    app.add_route("/electricity/prices/", PriceResource())
+    app.add_route("/electricity/current/", CurrentResource())
+    app.add_sink(Sink().on_get)  # route all unknown traffic to the sink
+
+    print(f"backend server running at {host}:{port}")
+
+    run_server(app, host, port)
+
+
+if __name__ == "__main__":
+    pass
