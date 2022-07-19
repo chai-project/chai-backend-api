@@ -59,7 +59,6 @@ def main(host: str = "0.0.0.0", port: int = 8080, bearer: Optional[str] = None):
     homes = Homes()
 
     # instantiate a callable WSGI app
-    # TODO: handle CORS in Falcon, or through reverse proxy?
     token_auth = TokenAuthBackend(user_loader=lambda x: True if x == bearer or bearer is None else None,
                                   auth_header_prefix="Bearer")
     auth_middleware = FalconAuthMiddleware(token_auth)
