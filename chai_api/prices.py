@@ -36,14 +36,11 @@ class PriceResource:
 
             if request.end is None:
                 if request.limit is None:
-                    print("setting end date")
                     request.end = request.start.add(days=1)
                 else:
                     request.end = request.start.add(days=math.ceil(request.limit / 46))
 
             entries: [ElectricityPrice] = get_energy_values(request.start, request.end, request.limit)
-
-            print(len(entries))
 
             resp.content_type = falcon.MEDIA_JSON
             resp.status = falcon.HTTP_OK
