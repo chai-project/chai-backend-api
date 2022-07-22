@@ -49,19 +49,3 @@ class ValveStatus:
 
     def to_dict(self):
         return asdict(self)
-
-
-@dataclass
-class Rate:
-    start: DateTime
-    end: DateTime
-    rate: float
-    predicted: bool
-
-    def to_dict(self):
-        return {
-            "start": self.start.isoformat(),
-            "end": self.end.isoformat(),
-            "rate": self.rate,
-            "predicted": self.predicted,
-        }
