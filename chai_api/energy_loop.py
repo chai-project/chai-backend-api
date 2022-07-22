@@ -1334,6 +1334,9 @@ def get_energy_values(start_date: pendulum.DateTime, end_date: pendulum.DateTime
     if end_date < start_date:
         raise ValueError("The end date must be after or on the start date.")
 
+    if limit is not None and limit < 0:
+        raise ValueError("The limit must be greater than or equal to 0.")
+
     # split this up into requests for individual years and concatenate the results
     requests = []
 
@@ -1455,6 +1458,32 @@ class EnergyLoopTests(unittest.TestCase):
                 target_day = start_date.add(days=offset).day_of_week
                 reference_date_adjusted = reference_date.add(days=selected_days[offset] - 1)
                 self.assertEqual(target_day, reference_date_adjusted.day_of_week)
+
+    def testMainCall(self):
+        values = get_energy_values(pendulum.parse("2021-07-22T00:00"), pendulum.parse("2021-07-22T12:00"))
+        self.assertEqual(len(values), 24)
+
+        current = pendulum.parse("2021-07-22T00:00")
+        for value in values:
+            self.assertEqual(current, value.from_date)
+            current = current.add(minutes=30)
+
+    def testMainLimited(self):
+        values = get_energy_values(pendulum.parse("2021-07-22T00:00"), pendulum.parse("2021-07-22T12:00"), limit=10)
+        self.assertEqual(len(values), 10)
+
+        current = pendulum.parse("2021-07-22T00:00")
+        for value in values:
+            self.assertEqual(current, value.from_date)
+            current = current.add(minutes=30)
+
+    def testMainLimitedAlt(self):
+        values = get_energy_values(pendulum.parse("2021-07-22T00:00"), pendulum.parse("2021-07-22T12:00"), limit=0)
+        self.assertEqual(len(values), 0)
+
+    def testMainLimitedWrong(self):
+        with self.assertRaises(ValueError):
+            _ = get_energy_values(pendulum.parse("2021-07-22T00:00"), pendulum.parse("2021-07-22T12:00"), limit=-1)
 
 
 if __name__ == "__main__":
