@@ -34,13 +34,14 @@ class PricesGet:
     start: Optional[DateTime]  # defaults to right now
     end: Optional[DateTime]
     limit: Optional[int]
-    export: Optional[bool]  # defaults to False
+    default_start: Optional[bool]
 
     def __post_init__(self):
         if self.start is None:
             self.start = DateTime.now("Europe/London")
-        if self.export is None:
-            self.export = False
+            self.default_start = True
+        else:
+            self.default_start = False
 
 
 @dataclass
