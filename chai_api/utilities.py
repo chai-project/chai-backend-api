@@ -1,10 +1,8 @@
 # pylint: disable=line-too-long, missing-module-docstring, c-extension-no-member
 
-import os
 from dataclasses import dataclass
 from typing import Optional, Dict, Callable, Union, TypeVar
 
-import ujson as json
 import falcon
 from falcon import Request, Response
 
