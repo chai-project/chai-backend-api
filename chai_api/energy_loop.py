@@ -1328,6 +1328,9 @@ def get_energy_values(start_date: pendulum.DateTime, end_date: pendulum.DateTime
     :return: A list of mock electricity values taken from the 2019 dataset
     """
 
+    if not end_date or not start_date:
+        raise ValueError("The start_date and end_date must be provided.")
+
     if end_date < start_date:
         raise ValueError("The end date must be after or on the start date.")
 
