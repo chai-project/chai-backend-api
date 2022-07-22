@@ -1,6 +1,6 @@
 import pendulum
 import unittest
-from typing import Union, List
+from typing import Union, List, Optional
 from dataclasses import dataclass
 import math
 
@@ -1319,11 +1319,12 @@ def _get_values(start_date: pendulum.DateTime, end_date: pendulum.DateTime,
     return result
 
 
-def get_energy_values(start_date: pendulum.DateTime, end_date: pendulum.DateTime):
+def get_energy_values(start_date: pendulum.DateTime, end_date: pendulum.DateTime, limit: Optional[int] = None):
     """
     Find and return the data corresponding with the given start (inclusive) and end date (exclusive).
     :param start_date: The start date of the range.
     :param end_date: The end date of the range.
+    :param limit: The maximum number of values to return starting from the oldest.
     :return: A list of mock electricity values taken from the 2019 dataset
     """
 
@@ -1363,8 +1364,11 @@ def get_energy_values(start_date: pendulum.DateTime, end_date: pendulum.DateTime
     # flatten to a list of values
     result = [day_value for sublist in result for day_value in sublist]  # flatten the list of lists
 
+    if limit is not None:
+        result = result[:limit]
+
     response = []
-    while report_date < end_date:
+    while report_date < end_date and len(result) > 0:
         next_date = report_date.add(minutes=30)
         response.append(ElectricityPrice(from_date=report_date, to_date=next_date, price=result.pop(0)))
         report_date = next_date
