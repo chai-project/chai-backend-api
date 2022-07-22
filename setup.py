@@ -9,7 +9,7 @@ from setuptools import setup
 setup(
     name="chai-api",
     packages=["chai_api"],
-    version="0.1.0",
+    version="0.2.0",
     description="API server to access the CHAI backend.",
     author="Kim Bauters",
     author_email="kim.bauters@bristol.ac.uk",
