@@ -43,23 +43,6 @@ def optional(source: Optional[Dict[K, V]], key: K, default: V = None,
         return default if mapping is None or default is None else mapping(default)
 
 
-def read_config(script_path: str = "") -> Configuration:
-    """
-    Read and parse a configuration file and return a Configuration instance.
-    :param script_path: The path to the script if it is different from "".
-    :return: A Configuration instance when all configuration settings could be retrieved, or throws an error.
-    """
-    with open(os.path.join(script_path, "../settings.json"), encoding="utf8") as json_data_file:
-        data = json.load(json_data_file)
-        if "host" not in data:
-            ValueError("expected a key 'host' to identify the web host for where the server should run")
-        if "port" not in data:
-            ValueError("expected a key 'port' to identify the port where the server should listen")
-        if "secret" not in data:
-            ValueError("expected a key 'secret' to identify the the shared bearer token")
-        return Configuration(host=data["host"], port=int(data["port"]), secret=data["secret"])
-
-
 def _get_header_token(header: Optional[str]) -> Optional[str]:
     prefix = "Bearer "
     if header is None:
@@ -99,4 +82,4 @@ def bearer_authentication(token: str):
 
 
 if __name__ == "__main__":
-    print(read_config(os.path.dirname(os.path.realpath(__file__))))
+    pass
