@@ -1362,8 +1362,7 @@ def get_energy_values(start_date: pendulum.DateTime, end_date: pendulum.DateTime
         response.append(ElectricityPrice(from_date=report_date, to_date=next_date, price=result.pop(0)))
         report_date = next_date
 
-    print(response)
-    pass
+    return response
 
 
 class EnergyLoopTests(unittest.TestCase):
