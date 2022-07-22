@@ -52,20 +52,6 @@ class ValveStatus:
 
 
 @dataclass
-class BatteryMode:
-    mode: BatteryModeOption
-    status: BatteryChargeStatus
-    percentage: int
-
-    def to_dict(self):
-        return {
-            "mode": self.mode.value,
-            "status": self.status.value,
-            "percentage": max(0, min(100, self.percentage))
-        }
-
-
-@dataclass
 class Rate:
     start: DateTime
     end: DateTime
@@ -78,14 +64,4 @@ class Rate:
             "end": self.end.isoformat(),
             "rate": self.rate,
             "predicted": self.predicted,
-        }
-
-
-@dataclass
-class Current:
-    power: int
-
-    def to_dict(self):
-        return {
-            "power": self.power,
         }

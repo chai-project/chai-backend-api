@@ -19,10 +19,8 @@ except (ImportError, ModuleNotFoundError):
     def run_server(app: App, host: str, port: int):
         HTTPServer((host, port), app).start()
 
-from chai_api.battery import BatteryResource
 from chai_api.heating import HeatingResource
 from chai_api.prices import PriceResource
-from chai_api.electricity import CurrentResource
 from chai_persistence import Homes
 
 SCRIPT_PATH: str = os.path.dirname(os.path.realpath(__file__))
@@ -66,9 +64,7 @@ def main(host: str = "0.0.0.0", port: int = 8080, bearer: Optional[str] = None):
 
     # create routes to resource instances
     app.add_route("/heating/mode/", HeatingResource())
-    app.add_route("/battery/mode/", BatteryResource())
     app.add_route("/electricity/prices/", PriceResource())
-    app.add_route("/electricity/current/", CurrentResource())
     app.add_sink(Sink().on_get)  # route all unknown traffic to the sink
 
     print(f"backend server running at {host}:{port}")
