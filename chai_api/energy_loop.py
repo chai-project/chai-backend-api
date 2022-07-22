@@ -11,6 +11,13 @@ class ElectricityPrice:
     to_date: pendulum.DateTime
     price: float
 
+    def to_dict(self):
+        return {
+            "start": self.from_date.isoformat(),
+            "end": self.to_date.isoformat(),
+            "rate": self.price,
+        }
+
 
 data_2019 = {
     1: [13.146, 14.7, 13.65, 12.348, 10.5, 10.416, 10.248, 8.988, 10.71, 10.332, 9.618, 10.71, 10.71, 10.71, 7.14, 7.14,
