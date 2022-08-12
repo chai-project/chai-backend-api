@@ -648,16 +648,14 @@ components:
       type: array
       description: "A time-tagged list of sorted (oldest to newest) historic values for the heating system."
       items:
-        type: array
-        items:
-          type: object
-          properties:
-            timestamp:
-              type: string
-              format: ISO8601
-              example: 2022-04-15T12:30:00
-            value:
-              type: number
-              description: The historic temperature at this timestamp if requesting temperatures, or the percentage that the valve is open at this timestamp if requesting the valve status.
-              example: 20.5
+        type: object
+        properties:
+          timestamp:
+            type: string
+            format: ISO8601
+            example: 2022-04-15T12:30:00
+          value:
+            type: number
+            description: The historic temperature at this timestamp if requesting temperatures, or the percentage that the valve is open at this timestamp if requesting the valve status.
+            example: 20.5
 
