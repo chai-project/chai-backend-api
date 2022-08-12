@@ -32,7 +32,7 @@ class HeatingMode:
     valve: bool
     target: Optional[float]
 
-    def to_dict(self):
+    def to_dict(self):  # pylint: disable=missing-function-docstring
         values = {
             "temperature": self.temperature,
             "mode": self.mode.value,
@@ -47,5 +47,5 @@ class HeatingMode:
 class ValveStatus:
     open: bool
 
-    def to_dict(self):
+    def to_dict(self):  # pylint: disable=missing-function-docstring
         return asdict(self)

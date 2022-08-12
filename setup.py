@@ -20,11 +20,13 @@ setup(
                       "falcon",  # fast web framework
                       "click",  # easy decorator style command line interface
                       "falcon_auth",  # simple authentication middleware for falcon
-                      # "chai-data-sources",
-                      # "chai-persistence",
+                      "pg8000",  # pure Python PostgreSQL database adapter
+                      "sqlalchemy",  # ORM for database access
+                      "falcon_sqla",  # SQL session middleware for falcon
+                      "tomli",  # TOML configuration file parser
                       ],
     extras_require={
-        "compat": ["cheroot"],  # pure Python WSGI server
+        "compat": ["cheroot", "pylint", "perflint"],  # pure Python WSGI server
         "speed": ["bjoern"],  # fast WSGI server
     },
     classifiers=[],

@@ -3,7 +3,10 @@
 from dataclasses import dataclass
 from pendulum import DateTime
 from typing import Optional
-from chai_api.responses import HeatingModeOption, BatteryModeOption
+
+from pendulum import DateTime
+
+from chai_api.responses import HeatingModeOption
 
 
 @dataclass

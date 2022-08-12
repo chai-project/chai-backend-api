@@ -1,0 +1,19 @@
+# Provide the settings for the backend API.
+
+# Debug options can be enabled for the server, for the DB, or both.
+# When all debug options are present the generic one is applied first, and then overwritten by section-based options.
+
+debug  = false
+
+[server]
+host   = "0.0.0.0"
+port   = 8080
+bearer = "bearer_token_here"
+debug  = false
+
+[database]
+server = "127.0.0.1"
+dbname = "chai"
+user   = "api_access"
+pass   = "db_password_here"
+debug  = false

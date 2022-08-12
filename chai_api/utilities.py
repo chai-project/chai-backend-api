@@ -1,4 +1,5 @@
 # pylint: disable=line-too-long, missing-module-docstring, c-extension-no-member
+# pylint: disable=no-member, missing-function-docstring
 
 from dataclasses import dataclass
 from typing import Optional, Dict, Callable, Union, TypeVar
