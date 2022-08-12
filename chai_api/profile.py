@@ -54,7 +54,8 @@ class ProfileResource:
 
             result: [Profile] = query.all()
 
-            response = sorted([ProfileEntry(result.profile_id, result.mean2, result.mean1) for result in result], key=lambda x: x.profile)
+            response = sorted([ProfileEntry(result.profile_id, result.mean2, result.mean1) for result in result],
+                              key=lambda x: x.profile)
 
             resp.content_type = falcon.MEDIA_JSON
             resp.text = json.dumps([entry.to_dict() for entry in response])
