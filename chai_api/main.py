@@ -28,6 +28,7 @@ except (ImportError, ModuleNotFoundError):
 from chai_api.db_definitions import db_engine, Configuration as DBConfiguration
 from chai_api.heating import HeatingResource, ValveResource
 from chai_api.history import HistoryResource
+from chai_api.logs import LogsResource
 from chai_api.prices import PriceResource
 from chai_persistence import Homes
 
@@ -178,6 +179,7 @@ def main(settings: Configuration):
     app.add_route("/heating/valve/", ValveResource())
     app.add_route("/heating/historic/", HistoryResource())
     app.add_route("/electricity/prices/", PriceResource())
+    app.add_route("/logs/", LogsResource())
     app.add_sink(Sink().on_get)  # route all unknown traffic to the sink
 
     print(f"backend server running at {settings.host}:{settings.port}")

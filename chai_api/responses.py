@@ -2,7 +2,7 @@
 
 from dataclasses import dataclass, asdict
 from enum import Enum
-from typing import Optional
+from typing import Optional, List, Dict
 from pendulum import DateTime
 
 
@@ -49,3 +49,19 @@ class ValveStatus:
 
     def to_dict(self):  # pylint: disable=missing-function-docstring
         return asdict(self)
+
+
+@dataclass
+class LogEntry:
+    timestamp: DateTime
+    category: str
+    parameters: List
+
+    def to_dict(self):  # pylint: disable=missing-function-docstring
+        values = {
+            "timestamp": self.timestamp.isoformat(),
+            "category": self.category.upper(),
+            "parameters": self.parameters,
+        }
+        return values
+
