@@ -130,6 +130,44 @@ paths:
           schema:
             type: string
 
+  /heating/profile:
+    get:
+      tags:
+        - heating
+      responses:
+        '200':
+          description: "The profile information is a specific profile is requested, or a list of profiles if a profile ID was not specified."
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Profiles'
+                  - $ref: '#/components/schemas/Profile'
+        '400':
+          description: "The provided home label or profile ID is invalid."
+        '401':
+          description: "The bearer token is not provided or is invalid."
+        '500':
+          description: "The server experience an internal error."
+      summary: "Get the profile information for one or all profiles."
+      description: ""
+      operationId: "getProfile"
+      parameters:
+        - name: label
+          in: query
+          description: "The unique label of the home for which you are requesting the valve status."
+          required: true
+          schema:
+            type: string
+        - name: profile
+          in: query
+          description: "The ID of the profile you want the data for. **If this option is set you get a dictionary, instead of a list of dictionaries, as response.**"
+          required: false
+          schema:
+            type: number
+            minimum: 1
+            maximum: 5
+
   /heating/historic:
     get:
       tags:
@@ -585,6 +623,26 @@ components:
         example:
           0: "1"
           20: "2"
+
+    Profile:
+      type: object
+      description: "Information for the line equation that governs a profile. Within the domain [7, 30] and given a cost c the setpoint temperature t is calculated as t = slope * c + bias ."
+      properties:
+        id:
+          type: integer
+          example: 2
+        slope:
+          type: number
+          example: 3.2
+        bias:
+          type: number
+          example: 0.71
+
+    Profiles:
+      type: array
+      description: "A list of profiles properties, where the index in the array matches with the profile number."
+      items:
+        $ref: '#/components/schemas/Profile'
 
     HeatingHistoric:
       type: array
