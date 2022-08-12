@@ -1,7 +1,7 @@
 # pylint: disable=line-too-long, invalid-name, missing-module-docstring, missing-class-docstring
 
 from dataclasses import dataclass
-from pendulum import DateTime
+from enum import Enum
 from typing import Optional
 
 from pendulum import DateTime
@@ -21,15 +21,30 @@ class HeatingPut:
     target: Optional[float]
 
 
-@dataclass
-class BatteryGet:
-    label: str
+class HistoryOption(Enum):
+    TEMPERATURE = "temperature"
+    VALVE_STATUS = "valve_status"
 
 
 @dataclass
-class BatteryPut:
+class HistoryGet:
     label: str
-    mode: BatteryModeOption
+    source: HistoryOption
+    start: Optional[DateTime]  # defaults to one week ago, or one week before end
+    end: Optional[DateTime]
+
+    def __post_init__(self):
+        if self.start is None:
+            if self.end is None:
+                self.start = DateTime.now("Europe/London").add(days=-7)
+            else:
+                self.start = self.end.add(days=-7)
+
+
+@dataclass
+class ScheduleGet:
+    label: str
+    daymask: int
 
 
 @dataclass

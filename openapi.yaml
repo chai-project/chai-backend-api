@@ -204,14 +204,14 @@ paths:
             enum: [ "temperature", "valve_status" ]
         - name: start
           in: query
-          description: 'AN ISO8601 date indicating the start (inclusive) of the interval. The accepted format is ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2})?(?:([+-]\d\d:\d\d)|Z)?$'
-          required: true
+          description: 'AN ISO8601 date indicating the start (inclusive) of the interval. The accepted format is ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2})?(?:([+-]\d\d:\d\d)|Z)?$ . If omitted, the start date is 7 days ago, or 7 days before the end date if an end date is provided.'
+          required: false
           schema:
             type: string
         - name: end
           in: query
-          description: 'AN ISO8601 date indicating the end (exclusive) of the interval. The accepted format is ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2})?(?:([+-]\d\d:\d\d)|Z)?$'
-          required: true
+          description: 'AN ISO8601 date indicating the end (exclusive) of the interval. The accepted format is ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2})?(?:([+-]\d\d:\d\d)|Z)?$ . The end date is now if omitted.'
+          required: false
           schema:
             type: string
 
