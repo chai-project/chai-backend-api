@@ -1,12 +1,15 @@
-import pendulum
-import unittest
-from typing import Union, List, Optional
-from dataclasses import dataclass
+# pylint: disable=line-too-long, too-many-lines, missing-module-docstring
+
 import math
+import unittest
+from dataclasses import dataclass
+from typing import Union, List, Optional
+
+import pendulum
 
 
 @dataclass
-class ElectricityPrice:
+class ElectricityPrice:  # pylint: disable=missing-class-docstring, missing-function-docstring
     from_date: pendulum.DateTime
     to_date: pendulum.DateTime
     price: float
@@ -1312,11 +1315,7 @@ def _get_values(start_date: pendulum.DateTime, end_date: pendulum.DateTime,
         return to_fetch
 
     # look up the days to fetch in to_fetch, concatenate, and return
-    result = []
-    for fetch in to_fetch:
-        result.append(data_2019[fetch])
-
-    return result
+    return [data_2019[fetch] for fetch in to_fetch]
 
 
 def get_energy_values(start_date: pendulum.DateTime, end_date: pendulum.DateTime, limit: Optional[int] = None):
@@ -1360,7 +1359,7 @@ def get_energy_values(start_date: pendulum.DateTime, end_date: pendulum.DateTime
 
     minutes_between = (end_date.end_of("day").diff(end_date).in_seconds() + 1) / 60
     end_values_to_drop = math.floor(minutes_between / 30)
-    result[-1] = result[-1][0:len(result[-1])-min(len(result[-1]), end_values_to_drop)]
+    result[-1] = result[-1][0:len(result[-1]) - min(len(result[-1]), end_values_to_drop)]
 
     # all the data is ready; convert it into a nice response with start and end values
 
@@ -1383,6 +1382,13 @@ def get_energy_values(start_date: pendulum.DateTime, end_date: pendulum.DateTime
 
 
 class EnergyLoopTests(unittest.TestCase):
+    """
+    Tests to ensure that the electricity price loop works as expected and handles the edge cases.
+    """
+
+    # disable any warnings for these tests as performance does not matter
+    # pylint: disable=C0103, C0116, W1309, W8201, W8301, W8205
+
     def testCorrectBST(self):
         """
         Ensure that the BST date always returns a BST result set a.k.a. the 90th day for the transition to summer time.
