@@ -140,9 +140,7 @@ paths:
           content:
             application/json:
               schema:
-                oneOf:
-                  - $ref: '#/components/schemas/Profiles'
-                  - $ref: '#/components/schemas/Profile'
+                $ref: '#/components/schemas/Profiles'
         '400':
           description: "The provided home label or profile ID is invalid."
         '401':
@@ -161,7 +159,7 @@ paths:
             type: string
         - name: profile
           in: query
-          description: "The ID of the profile you want the data for. **If this option is set you get a dictionary, instead of a list of dictionaries, as response.**"
+          description: "The ID of the profile you want the data for."
           required: false
           schema:
             type: number
@@ -628,7 +626,7 @@ components:
       type: object
       description: "Information for the line equation that governs a profile. Within the domain [7, 30] and given a cost c the setpoint temperature t is calculated as t = slope * c + bias ."
       properties:
-        id:
+        profile:
           type: integer
           example: 2
         slope:

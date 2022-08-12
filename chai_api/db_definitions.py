@@ -135,7 +135,6 @@ class Profile(Base):
     variance1 = Column(Float, nullable=False)
     variance2 = Column(Float, nullable=False)
     correlation = Column(Float, nullable=False)
-    profile = Column(JSON, nullable=False)
     noise_variance = Column("noisevariance", Float, nullable=False)
     home: Home = relationship("Home")
     setpointChange: SetpointChange = relationship("SetpointChange")

@@ -30,6 +30,7 @@ from chai_api.history import HistoryResource
 from chai_api.logs import LogsResource
 from chai_api.prices import PriceResource
 from chai_api.schedule import ScheduleResource
+from chai_api.profile import ProfileResource
 
 SCRIPT_PATH: str = os.path.dirname(os.path.realpath(__file__))
 WD_PATH: str = os.getcwd()
@@ -173,6 +174,7 @@ def main(settings: Configuration):
     # create routes to resource instances
     app.add_route("/heating/mode/", HeatingResource())
     app.add_route("/heating/valve/", ValveResource())
+    app.add_route("/heating/profile/", ProfileResource())
     app.add_route("/heating/historic/", HistoryResource())
     app.add_route("/electricity/prices/", PriceResource())
     app.add_route("/logs/", LogsResource())

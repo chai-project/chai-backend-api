@@ -76,3 +76,9 @@ class LogsGet:
                 self.start = DateTime.now("Europe/London").add(days=-7)
             else:
                 self.start = self.end.add(days=-7)
+
+
+@dataclass
+class ProfileGet:
+    label: str
+    profile: Optional[int]

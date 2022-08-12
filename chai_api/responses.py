@@ -77,3 +77,18 @@ class ScheduleEntry:
             "schedule": self.schedule,
         }
         return values
+
+
+@dataclass
+class ProfileEntry:
+    profile: int
+    slope: float
+    bias: float
+
+    def to_dict(self):  # pylint: disable=missing-function-docstring
+        values = {
+            "profile": self.profile,
+            "slope": self.slope,
+            "bias": self.bias,
+        }
+        return values
