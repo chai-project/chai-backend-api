@@ -65,3 +65,15 @@ class LogEntry:
         }
         return values
 
+
+@dataclass
+class ScheduleEntry:
+    day: int
+    schedule: Dict[str, str]
+
+    def to_dict(self):  # pylint: disable=missing-function-docstring
+        values = {
+            "day": self.day,
+            "schedule": self.schedule,
+        }
+        return values

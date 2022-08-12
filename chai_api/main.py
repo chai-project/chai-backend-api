@@ -14,7 +14,6 @@ import tomli
 from falcon import App
 from falcon_auth import FalconAuthMiddleware, TokenAuthBackend as TokenAuth
 from falcon_sqla import Manager as SessionManager
-from typing import Optional
 
 try:
     from bjoern import run as run_server
@@ -30,7 +29,7 @@ from chai_api.heating import HeatingResource, ValveResource
 from chai_api.history import HistoryResource
 from chai_api.logs import LogsResource
 from chai_api.prices import PriceResource
-from chai_persistence import Homes
+from chai_api.schedule import ScheduleResource
 
 SCRIPT_PATH: str = os.path.dirname(os.path.realpath(__file__))
 WD_PATH: str = os.getcwd()
@@ -116,7 +115,6 @@ def cli(config, host, port, bearer_file, dbserver, db, username, dbpass_file, de
         click.echo("Bearer file not found. Please provide a valid file path.")
         sys.exit(0)
 
-    bearer = None
     if bearer_file:
         # use the contents of the file as the bearer token
         with open(bearer_file, encoding="utf-8") as file:
@@ -171,8 +169,6 @@ def main(settings: Configuration):
 
     # instantiate a callable WSGI app
     app = falcon.App(middleware=[auth_middleware, session_middleware] if bearer is not None else [session_middleware])
-    auth_middleware = FalconAuthMiddleware(token_auth)
-    app = falcon.App(middleware=[auth_middleware])
 
     # create routes to resource instances
     app.add_route("/heating/mode/", HeatingResource())
@@ -180,6 +176,7 @@ def main(settings: Configuration):
     app.add_route("/heating/historic/", HistoryResource())
     app.add_route("/electricity/prices/", PriceResource())
     app.add_route("/logs/", LogsResource())
+    app.add_route("/schedule/", ScheduleResource())
     app.add_sink(Sink().on_get)  # route all unknown traffic to the sink
 
     print(f"backend server running at {settings.host}:{settings.port}")
