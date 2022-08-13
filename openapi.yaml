@@ -31,7 +31,7 @@ paths:
         - heating
       responses:
         '200':
-          description: "The current setpoint mode and temperature of the home."
+          description: "The current setpoint mode and temperature of the home. When the heating mode is 'auto' the 'target_temperature' is the setpoint temperature based on the model for the current profile and the current price."
           content:
             application/json:
               schema:
@@ -513,15 +513,24 @@ components:
           type: number
           description: The current temperature in the room/house.
           example: 20.5
+        valve_open:
+            type: boolean
+            description: Whether the valve is open or not.
+            example: true
         mode:
           type: string
-          enum: [auto, on, off]
+          enum: [auto, on, off, override]
           example: auto
         target_temperature:
           type: number
-          description: The target temperature when in auto mode.
+          description: The target temperature when in auto mode or override.
           nullable: true
           example: 21
+        expires_at:
+          type: string
+          description: 'AN ISO8601 date indicating the end of the manual mode or override.'
+          nullable: true
+
     
   
     ValveStatus:

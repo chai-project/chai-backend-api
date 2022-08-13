@@ -23,6 +23,7 @@ class HeatingModeOption(Enum):
     AUTO = "auto"
     ON = "on"
     OFF = "off"
+    OVERRIDE = "override"
 
 
 @dataclass
@@ -31,6 +32,7 @@ class HeatingMode:
     mode: HeatingModeOption
     valve: bool
     target: Optional[float]
+    expires_at: Optional[DateTime]
 
     def to_dict(self):  # pylint: disable=missing-function-docstring
         values = {
@@ -40,6 +42,8 @@ class HeatingMode:
         }
         if self.target is not None:
             values["target_temperature"] = self.target
+        if self.expires_at is not None:
+            values["expires_at"] = self.expires_at.isoformat()
         return values
 
 

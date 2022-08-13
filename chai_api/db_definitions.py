@@ -98,10 +98,11 @@ class SetpointChange(Base):
     __tablename__ = "setpointchange"
     id = Column(Integer, primary_key=True)
     home_id = Column("homeid", Integer, ForeignKey("home.id"), nullable=False)
-    changed_at = Column("changedAt", DateTime, nullable=False)
+    changed_at = Column("changedat", DateTime, nullable=False)
     mode = Column(Integer, nullable=False)
     temperature = Column(Float)
     duration = Column(Integer)
+    expires_at = Column("expiresat", DateTime, nullable=False)
     home: Home = relationship("Home")
 
 
@@ -138,6 +139,14 @@ class Profile(Base):
     noise_variance = Column("noisevariance", Float, nullable=False)
     home: Home = relationship("Home")
     setpointChange: SetpointChange = relationship("SetpointChange")
+
+    def calculate_temperature(self, price: float):
+        """
+        Calculate the temperature for the given price for this model.
+        :param price: The price used to calculate the temperature.
+        :return: The temperature based on the model.
+        """
+        return price * self.mean2 + self.mean1
 
 
 def get_home(label: str, session: Session) -> Optional[Home]:
