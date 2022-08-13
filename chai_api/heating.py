@@ -176,7 +176,6 @@ class HeatingResource:
 
     def on_put(self, req: Request, resp: Response):  # noqa
         try:
-            print(req.media)
             request: HeatingPut = from_dict(HeatingPut, req.media, config=Config(cast=[HeatingModeOption]))
             db_session = req.context.session
 
