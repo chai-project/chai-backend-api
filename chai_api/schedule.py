@@ -171,6 +171,8 @@ class ScheduleResource:
             cleaned_day_schedules = []
             for entry in day_schedules:
                 cleaned = []
+                # ignore the warning, we changed it from [None] to [(int, int)]
+                # noinspection PyUnresolvedReferences
                 for (key, value) in entry.items():
                     cleaned.append((int(key), int(value)))
                 cleaned_day_schedules.append(sorted(cleaned, key=lambda x: x[0]))
@@ -211,6 +213,8 @@ class ScheduleResource:
                 for (key, value) in schedule:
                     schedule_dict[f"{key}"] = f"{value}"
                 # store the schedule in the database
+                # noinspection PyTypeChecker
+                # ignore the warnings; DateTime is a datetime.datetime (compatible) instance
                 db_session.add(Schedule(home=home, revision=revision, day=2 ** (index - 1), schedule=schedule_dict))
             db_session.commit()
         except (DaciteError, ValueError) as err:
