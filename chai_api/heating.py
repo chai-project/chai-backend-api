@@ -228,6 +228,8 @@ class HeatingResource:
             db_session.commit()
 
             # TODO: trigger Netatmo thermostatic valve change
+            # TODO: undo DB entry if the Netatmo change fails
+
             resp.status = falcon.HTTP_OK
         except (DaciteError, ValueError) as err:
             resp.content_type = falcon.MEDIA_TEXT
