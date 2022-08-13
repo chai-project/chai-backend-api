@@ -19,6 +19,7 @@ class HeatingPut:
     label: str
     mode: HeatingModeOption
     target: Optional[float]
+    timeout: Optional[int]
 
 
 class HistoryOption(Enum):

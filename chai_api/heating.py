@@ -197,6 +197,13 @@ class HeatingResource:
                     resp.status = falcon.HTTP_BAD_REQUEST
                     return
 
+            if request.timeout is not None:
+                if not 1 <= request.timeout <= 1440:
+                    resp.content_type = falcon.MEDIA_TEXT
+                    resp.text = "timeout expected between 1 (exclusive) and 1440 (inclusive) minutes"
+                    resp.status = falcon.HTTP_BAD_REQUEST
+                    return
+
             # all is looking good, we can link this to the home
             home = get_home(request.label, db_session)
 
@@ -213,7 +220,7 @@ class HeatingResource:
                 home=home,
                 changed_at=datetime.fromtimestamp(changed_at.timestamp(), pendulum.timezone("Europe/London")),
                 expires_at=datetime.fromtimestamp(expires_at.timestamp(), pendulum.timezone("Europe/London")),
-                duration=60, mode=request.mode.get_id(),
+                duration=60 if not request.timeout else request.timeout, mode=request.mode.get_id(),
                 temperature=request.target if request.mode == HeatingModeOption.AUTO else None
             )
 
