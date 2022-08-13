@@ -6,7 +6,6 @@ import falcon
 import pendulum
 import ujson as json
 from dacite import from_dict, DaciteError, Config
-from datetime import datetime
 from falcon import Request, Response
 from sqlalchemy import and_
 from sqlalchemy.orm import aliased
@@ -218,6 +217,7 @@ class HeatingResource:
             changed_at = pendulum.now("Europe/London")
             expires_at = changed_at.add(minutes=60)
 
+            # noinspection PyTypeChecker
             setpoint_change = SetpointChange(
                 home=home,
                 # ignore the warnings; DateTime is a datetime.datetime (compatible) instance
