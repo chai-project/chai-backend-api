@@ -205,7 +205,7 @@ class ScheduleResource:
                     schedule.insert(0, (0, last_entry[1]))
 
             # now cleaned_day_schedules has the schedule we want to store, and updating_indices has the days
-            revision = pendulum.now("Europe/London")
+            revision = pendulum.now("Europe/London").in_timezone("UTC")
             for index in updating_indices:
                 schedule = cleaned_day_schedules[index]
                 # convert the schedule into a dictionary

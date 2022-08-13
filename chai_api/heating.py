@@ -215,7 +215,7 @@ class HeatingResource:
                 resp.status = falcon.HTTP_BAD_REQUEST
                 return
 
-            changed_at = pendulum.now("Europe/London")
+            changed_at = pendulum.now("Europe/London").in_timezone("UTC")
             expires_at = changed_at.add(minutes=60)
 
             # noinspection PyTypeChecker
