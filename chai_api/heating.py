@@ -78,6 +78,8 @@ class HeatingResource:
                 SetpointChange.home_id == home.id
             ).filter(
                 SetpointChange.expires_at > func.current_timestamp()
+            ).order_by(
+                SetpointChange.id.desc()
             ).first()
 
             if active_setpoint is not None:
