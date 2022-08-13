@@ -25,6 +25,15 @@ class HeatingModeOption(Enum):
     OFF = "off"
     OVERRIDE = "override"
 
+    def get_id(self) -> int:
+        if self == HeatingModeOption.AUTO:
+            return 1
+        elif self == HeatingModeOption.ON:
+            return 2
+        elif self == HeatingModeOption.OFF:
+            return 3
+        raise ValueError(f"Unknown heating mode '{self.value}'.")
+
 
 @dataclass
 class HeatingMode:

@@ -6,6 +6,7 @@ import falcon
 import pendulum
 import ujson as json
 from dacite import from_dict, DaciteError, Config
+from datetime import datetime
 from falcon import Request, Response
 from sqlalchemy import and_
 from sqlalchemy.orm import aliased
@@ -174,7 +175,15 @@ class HeatingResource:
 
     def on_put(self, req: Request, resp: Response):  # noqa
         try:
-            request: HeatingPut = from_dict(HeatingPut, req.params, config=Config(cast=[HeatingModeOption]))
+            print(req.media)
+            request: HeatingPut = from_dict(HeatingPut, req.media, config=Config(cast=[HeatingModeOption]))
+            db_session = req.context.session
+
+            if request.mode == HeatingModeOption.OVERRIDE:
+                resp.content_type = falcon.MEDIA_TEXT
+                resp.status = falcon.HTTP_BAD_REQUEST
+                resp.text = f"one or more of the parameters was not understood"
+                return
 
             if request.mode == HeatingModeOption.AUTO:
                 if request.target is None:
@@ -188,10 +197,35 @@ class HeatingResource:
                     resp.status = falcon.HTTP_BAD_REQUEST
                     return
 
-                # TODO: implement PUT /heating/mode
+            # all is looking good, we can link this to the home
+            home = get_home(request.label, db_session)
 
-        except (DaciteError, ValueError):
+            if home is None:
+                resp.content_type = falcon.MEDIA_TEXT
+                resp.text = "unknown home label"
+                resp.status = falcon.HTTP_BAD_REQUEST
+                return
+
+            changed_at = pendulum.now("Europe/London")
+            expires_at = changed_at.add(minutes=60)
+
+            setpoint_change = SetpointChange(
+                home=home,
+                changed_at=datetime.fromtimestamp(changed_at.timestamp(), pendulum.timezone("Europe/London")),
+                expires_at=datetime.fromtimestamp(expires_at.timestamp(), pendulum.timezone("Europe/London")),
+                duration=60, mode=request.mode.get_id(),
+                temperature=request.target if request.mode == HeatingModeOption.AUTO else None
+            )
+
+            db_session.add(setpoint_change)
+            db_session.commit()
+
+            # TODO: trigger Netatmo thermostatic valve change
+            resp.status = falcon.HTTP_OK
+        except (DaciteError, ValueError) as err:
+            resp.content_type = falcon.MEDIA_TEXT
             resp.status = falcon.HTTP_BAD_REQUEST
+            resp.text = f"one or more of the parameters was not understood\n{err}"
 
 
 class ValveResource:
@@ -229,5 +263,7 @@ class ValveResource:
             resp.text = json.dumps(ValveStatus(open=reading.reading > 0).to_dict())
             resp.status = falcon.HTTP_OK
 
-        except DaciteError:
+        except DaciteError as err:
+            resp.content_type = falcon.MEDIA_TEXT
             resp.status = falcon.HTTP_BAD_REQUEST
+            resp.text = f"one or more of the parameters was not understood\n{err}"

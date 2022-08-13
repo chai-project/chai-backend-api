@@ -99,10 +99,10 @@ class SetpointChange(Base):
     id = Column(Integer, primary_key=True)
     home_id = Column("homeid", Integer, ForeignKey("home.id"), nullable=False)
     changed_at = Column("changedat", DateTime, nullable=False)
+    expires_at = Column("expiresat", DateTime, nullable=False)
+    duration = Column(Integer)
     mode = Column(Integer, nullable=False)
     temperature = Column(Float)
-    duration = Column(Integer)
-    expires_at = Column("expiresat", DateTime, nullable=False)
     home: Home = relationship("Home")
 
 
