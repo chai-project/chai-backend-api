@@ -220,8 +220,9 @@ class HeatingResource:
 
             setpoint_change = SetpointChange(
                 home=home,
-                changed_at=datetime.fromtimestamp(changed_at.timestamp(), pendulum.timezone("Europe/London")),
-                expires_at=datetime.fromtimestamp(expires_at.timestamp(), pendulum.timezone("Europe/London")),
+                # ignore the warnings; DateTime is a datetime.datetime (compatible) instance
+                changed_at=changed_at,
+                expires_at=expires_at,
                 duration=60 if not request.timeout else request.timeout, mode=request.mode.get_id(),
                 temperature=request.target if request.mode == HeatingModeOption.AUTO else None
             )
