@@ -83,7 +83,7 @@ paths:
           required: true
           schema:
             type: string
-            enum: [auto, on, off]
+            enum: ['auto', 'on', 'off']
         - name: target
           in: query
           description: "The desired temperature in auto mode."
