@@ -1327,6 +1327,11 @@ def get_energy_values(start_date: pendulum.DateTime, end_date: pendulum.DateTime
     :return: A list of mock electricity values taken from the 2019 dataset
     """
 
+    # CAREFUL: for calculations we need to take account that the original source is in the Europe/London timezone.
+    #          If we forget to convert, the minutes between will be incorrect.
+    start_date = start_date.in_timezone("Europe/London")
+    end_date = end_date.in_timezone("Europe/London")
+
     if not end_date or not start_date:
         raise ValueError("The start_date and end_date must be provided.")
 
@@ -1490,6 +1495,18 @@ class EnergyLoopTests(unittest.TestCase):
     def testMainLimitedWrong(self):
         with self.assertRaises(ValueError):
             _ = get_energy_values(pendulum.parse("2021-07-22T00:00"), pendulum.parse("2021-07-22T12:00"), limit=-1)
+
+    def testRecordsBeforeDST(self):
+        values = get_energy_values(pendulum.parse("2023-03-25T00:00"), pendulum.parse("2023-03-25T01:00"))
+        self.assertEqual(len(values), 2)
+
+    def testRecordsOnDSTDayExcludingTransition(self):
+        values = get_energy_values(pendulum.parse("2023-03-26T00:00"), pendulum.parse("2023-03-26T01:00"))
+        self.assertEqual(len(values), 2)
+
+    def testRecordsAfterDST(self):
+        values = get_energy_values(pendulum.parse("2023-03-27T00:00"), pendulum.parse("2023-03-27T01:00"))
+        self.assertEqual(len(values), 2)
 
 
 if __name__ == "__main__":
