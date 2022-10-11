@@ -184,7 +184,7 @@ class HeatingResource:
             if request.mode == HeatingModeOption.OVERRIDE:
                 resp.content_type = falcon.MEDIA_TEXT
                 resp.status = falcon.HTTP_BAD_REQUEST
-                resp.text = f"one or more of the parameters was not understood"
+                resp.text = f"do not use 'override' to change mode, use 'on' or 'off' instead"
                 return
 
             if request.mode == HeatingModeOption.AUTO:
@@ -215,7 +215,7 @@ class HeatingResource:
                 resp.status = falcon.HTTP_BAD_REQUEST
                 return
 
-            changed_at = pendulum.now("Europe/London").in_timezone("UTC")
+            changed_at = pendulum.now("Europe/London")
             expires_at = changed_at.add(minutes=60)
 
             # noinspection PyTypeChecker
