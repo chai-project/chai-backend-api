@@ -80,5 +80,13 @@ def bearer_authentication(token: str):
     return decorator
 
 
+def create_user_token() -> str:
+    import uuid
+    import hashlib
+
+    # create a 1 UUID string (best privacy), hash it, and return the first 24 characters
+    return hashlib.sha3_256(str(uuid.uuid4()).encode('utf-8')).hexdigest()[:24]
+
+
 if __name__ == "__main__":
     pass
