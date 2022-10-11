@@ -157,8 +157,24 @@ def main(settings: Configuration):
     """
     #  create the token authorisation middleware
     bearer = settings.bearer
-    auth = TokenAuth(user_loader=lambda x: True if x == bearer or bearer is None else False,  # pylint: disable=R1719
-                     auth_header_prefix="Bearer")
+
+    def user_loader(token: str) -> Optional[str]:
+        """
+        The user loader function for the token authorisation middleware.
+        :param token: The token to check.
+        :return: The user token if given ("anonymous" otherwise) if the bearer is valid, or None.
+        """
+        parts = token.split(",")
+        parts = [part.strip() for part in parts]
+        # bearer expected, the user token must be provided as bearer,user_token
+        if len(parts) == 1 and parts[0] == bearer:
+            return "anonymous"
+        elif len(parts) == 2 and parts[0] == bearer:
+            return parts[1]
+        else:
+            return None
+
+    auth = TokenAuth(user_loader=user_loader, auth_header_prefix="Bearer")
     auth_middleware = FalconAuthMiddleware(auth)
 
     #  create the database session middleware

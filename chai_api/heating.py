@@ -24,11 +24,11 @@ class HeatingResource:
             db_session = req.context.session
 
             # find the correct home for the user
-            home = get_home(request.label, db_session)
+            home = get_home(request.label, db_session, req.context.get("user", "anonymous"))
 
             if home is None:
                 resp.content_type = falcon.MEDIA_TEXT
-                resp.text = "unknown home label"
+                resp.text = "unknown home label, or invalid home token"
                 resp.status = falcon.HTTP_BAD_REQUEST
                 return
 
@@ -207,11 +207,11 @@ class HeatingResource:
                     return
 
             # all is looking good, we can link this to the home
-            home = get_home(request.label, db_session)
+            home = get_home(request.label, db_session, req.context.get("user", "anonymous"))
 
             if home is None:
                 resp.content_type = falcon.MEDIA_TEXT
-                resp.text = "unknown home label"
+                resp.text = "unknown home label, or invalid home token"
                 resp.status = falcon.HTTP_BAD_REQUEST
                 return
 
@@ -248,11 +248,11 @@ class ValveResource:
             db_session = req.context.session
 
             # find the correct home for the user
-            home = get_home(request.label, db_session)
+            home = get_home(request.label, db_session, req.context.get("user", "anonymous"))
 
             if home is None:
                 resp.content_type = falcon.MEDIA_TEXT
-                resp.text = "unknown home label"
+                resp.text = "unknown home label, or invalid home token"
                 resp.status = falcon.HTTP_BAD_REQUEST
                 return
 

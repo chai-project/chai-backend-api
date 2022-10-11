@@ -30,11 +30,11 @@ class ScheduleResource:
                 resp.status = falcon.HTTP_BAD_REQUEST
                 return
 
-            home = get_home(request.label, db_session)
+            home = get_home(request.label, db_session, req.context.get("user", "anonymous"))
 
             if home is None:
                 resp.content_type = falcon.MEDIA_TEXT
-                resp.text = "unknown home label"
+                resp.text = "unknown home label, or invalid home token"
                 resp.status = falcon.HTTP_BAD_REQUEST
                 return
 
@@ -81,11 +81,11 @@ class ScheduleResource:
                 resp.status = falcon.HTTP_BAD_REQUEST
                 return
 
-            home = get_home(request.label, db_session)
+            home = get_home(request.label, db_session, req.context.get("user", "anonymous"))
 
             if home is None:
                 resp.content_type = falcon.MEDIA_TEXT
-                resp.text = "unknown home label"
+                resp.text = "unknown home label, or invalid home token"
                 resp.status = falcon.HTTP_BAD_REQUEST
                 return
 

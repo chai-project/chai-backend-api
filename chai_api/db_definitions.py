@@ -73,6 +73,7 @@ class Home(Base):
     __tablename__ = "home"
     id = Column(Integer, primary_key=True)
     label = Column(String, nullable=False)
+    token = Column(String, nullable=False)
     revision = Column(TIMESTAMP, nullable=False)
     netatmoID = Column("netatmoid", Integer, ForeignKey("netatmodevice.id"), nullable=False)
     heat_gain = Column("heatgain", Float, nullable=False)
@@ -149,11 +150,12 @@ class Profile(Base):
         return price * self.mean2 + self.mean1
 
 
-def get_home(label: str, session: Session) -> Optional[Home]:
+def get_home(label: str, session: Session, token: str) -> Optional[Home]:
     """
     Get the home associated with a given label.
     :param label: The label of the home to get.
     :param session: The database session to use.
+    :param token: The token to use to verify the home access.
     :return: The home associated with the label.
     """
     home_alias = aliased(Home)
@@ -166,7 +168,11 @@ def get_home(label: str, session: Session) -> Optional[Home]:
     ).filter(
         Home.label == label
     ).first()
-    return home
+
+    if token == "anonymous" or home.token == token:
+        return home
+    else:
+        return None
 
 
 if __name__ == "__main__":
