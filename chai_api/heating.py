@@ -178,7 +178,7 @@ class HeatingResource:
         try:
             options = req.params
             options.update(req.media)
-            request: HeatingPut = from_dict(HeatingPut, options, config=Config(cast=[HeatingModeOption, int]))
+            request: HeatingPut = from_dict(HeatingPut, options, config=Config(cast=[HeatingModeOption, int, float]))
             db_session = req.context.session
 
             if request.mode == HeatingModeOption.OVERRIDE:
