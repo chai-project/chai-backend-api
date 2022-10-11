@@ -175,7 +175,9 @@ def main(settings: Configuration):
             return None
 
     auth = TokenAuth(user_loader=user_loader, auth_header_prefix="Bearer")
-    auth_middleware = FalconAuthMiddleware(auth)
+    auth_middleware = FalconAuthMiddleware(auth, exempt_routes=[
+        "/electricity/prices/",
+    ])
 
     #  create the database session middleware
     db_config = DBConfiguration(username=settings.db_username, password=settings.db_password,
