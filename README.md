@@ -36,5 +36,6 @@ Development of the endpoints specified in the Open API specification is ongoing.
 | `GET` `/electricity/costs`       |  Missing   |
 | **logs endpoints**               |
 | `GET` `/logs`                    |  **Full**  |
+| `PUT` `/logs`                    |  **Full**  |
 
 Currently, all required endpoints are implemented. The mathematical background for the `/electricity/consumption` and `/electricity/costs` endpoints are known and well understood. Consumption calculation depends on weather data and home properties. The home properties are to be assessed during the installation of the thermostatic valve. Procedures to do so are known and need to be revised to match the time available for each hardware installation. The weather data depends only on the temperature, which is readily available through the free Met Norway service (using the `metno-locationforecast` package). 

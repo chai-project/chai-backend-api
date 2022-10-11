@@ -114,6 +114,7 @@ class Log(Base):
     timestamp = Column(TIMESTAMP, nullable=False)
     category = Column(String, nullable=False)
     parameters = Column(JSON, nullable=False)
+    home: Home = relationship("Home")
 
 
 class Schedule(Base):

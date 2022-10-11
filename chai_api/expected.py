@@ -80,6 +80,14 @@ class LogsGet:
 
 
 @dataclass
+class LogsPut:
+    label: str
+    category: str
+    timestamp: DateTime
+    parameters: list
+
+
+@dataclass
 class ProfileGet:
     label: str
     profile: Optional[int]
