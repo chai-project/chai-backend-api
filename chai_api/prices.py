@@ -16,7 +16,10 @@ from chai_api.energy_loop import get_energy_values, ElectricityPrice
 class PriceResource:
     def on_get(self, req: Request, resp: Response):  # noqa
         try:
-            request: PricesGet = from_dict(PricesGet, req.params, config=Config({DateTime: parse}, cast=[int]))
+            options = req.params
+            options.update(req.media)
+            request: PricesGet = from_dict(PricesGet, options, config=Config({DateTime: parse}, cast=[int]))
+            print(request)
 
             if request.end is not None and request.default_start:
                 resp.content_type = falcon.MEDIA_TEXT
