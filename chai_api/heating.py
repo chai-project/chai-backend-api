@@ -225,6 +225,7 @@ class HeatingResource:
                 changed_at=changed_at,
                 expires_at=expires_at,
                 duration=60 if not request.timeout else request.timeout, mode=request.mode.get_id(),
+                price=get_energy_values(changed_at, changed_at, limit=1)[0].price,
                 temperature=request.target if request.mode == HeatingModeOption.AUTO else None
             )
 

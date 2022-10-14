@@ -104,6 +104,7 @@ class SetpointChange(Base):
     duration = Column(Integer)
     mode = Column(Integer, nullable=False)
     temperature = Column(Float)
+    price = Column(Float)
     home: Home = relationship("Home")
 
 
