@@ -135,10 +135,6 @@ class Profile(Base):
     setpoint_id = Column("setpointid", Integer, ForeignKey("setpointchange.id"), nullable=False)
     mean1 = Column(Float, nullable=False)
     mean2 = Column(Float, nullable=False)
-    variance1 = Column(Float, nullable=False)
-    variance2 = Column(Float, nullable=False)
-    correlation = Column(Float, nullable=False)
-    noise_variance = Column("noisevariance", Float, nullable=False)
     home: Home = relationship("Home")
     setpointChange: SetpointChange = relationship("SetpointChange")
 
