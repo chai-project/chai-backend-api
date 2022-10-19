@@ -24,7 +24,6 @@ setup(
                       "sqlalchemy",  # ORM for database access
                       "falcon_sqla",  # SQL session middleware for falcon
                       "tomli",  # TOML configuration file parser
-                      "metno-locationforecast",  # access to weather data through the free MET Norway API
                       ],
     extras_require={
         "compat": ["cheroot", "pylint", "perflint"],  # pure Python WSGI server
