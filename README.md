@@ -38,3 +38,4 @@ Development of the endpoints specified in the Open API specification is ongoing.
 | **XAI endpoints**           |
 | `GET` `/xai/region`         |  **Full**  |
 | `PUT` `/xai/band`           |  **Full**  |
+| `PUT` `/xai/scatter`        |  **Full**  |

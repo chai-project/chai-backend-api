@@ -145,3 +145,29 @@ class XAIBand:
             "skip": self.skip,
         }
         return values
+
+
+@dataclass
+class XAIScatterEntry:
+    price: float
+    temperature: float
+
+    def to_dict(self):
+        values = {
+            "price": self.price,
+            "temperature": self.temperature,
+        }
+        return values
+
+
+@dataclass
+class XAIScatter:
+    entries: List[XAIScatterEntry]
+    count: int
+
+    def to_dict(self):
+        values = {
+            "entries": [entry.to_dict() for entry in self.entries],
+            "count": self.count,
+        }
+        return values
