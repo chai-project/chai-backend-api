@@ -449,6 +449,42 @@ paths:
             type: integer
             minimum: 0
 
+  /xai/scatter:
+    get:
+      tags:
+        - xai
+      responses:
+        '200':
+          description: "The matching XAI scatter plot data for the given profile and home."
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/XAIScatter'
+        '400':
+          description: "The provided label is invalid, or the provided profile is invalid."
+        '401':
+          description: "The bearer token is not provided or is invalid."
+        '500':
+          description: "The server experience an internal error."
+      summary: "Get the previous setpoint changes and at what price points they happened for use in the XAI scatter plot and for the given parameters."
+      description: ""
+      operationId: "getXAIScappter"
+      parameters:
+        - name: label
+          in: query
+          description: "The unique label of the home for which you are requesting the XAI band."
+          required: true
+          schema:
+            type: string
+        - name: profile
+          in: query
+          description: "The profile of the home for which you are requesting the XAI band."
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 5
+
   /schedule:
     get:
       tags:
@@ -647,6 +683,31 @@ components:
           type: integer
           description: The number of previous XAI regions skipped to obtain this result.
           example: 0
+
+    XAIScatterEntry:
+      type: object
+      properties:
+        temperature:
+            type: number
+            description: The temperature as set for the given price.
+            example: 19.0
+        price:
+            type: number
+            description: The given price at the time of the temperature change.
+            example: 10.88
+
+    XAIScatter:
+      type: object
+      properties:
+        count:
+          type: integer
+          description: The number of scatter point entries.
+          example: 3
+        entries:
+          type: array
+          items:
+            $ref: '#/components/schemas/XAIScatterEntry'
+          description: The individual scatter point entries, newest one first.
     
     Rate:
       type: object
