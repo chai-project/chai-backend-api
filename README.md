@@ -19,23 +19,22 @@ Development of the endpoints specified in the Open API specification is ongoing.
 
 ### Current Status
 
-| Endpoint                         | Pos Status | 
-|:---------------------------------|:----------:|
-| **heating endpoints**            |
-| `GET` `/heating/mode`            |  **Full**  |
-| `PUT` `/heating/mode`            |  **Full**  |
-| `GET` `/heating/valve`           |  **Full**  |
-| `GET` `/heating/profile`         |  **Full**  |
-| `GET` `/heating/historic`        |  **Full**  |
-| **schedule endpoints**           |
-| `GET` `/schedule`                |  **Full**  |
-| `PUT` `/schedule`                |  **Full**  |
-| **electricity endpoints**        |
-| `GET` `/electricity/prices`      |  **Full**  |
-| `GET` `/electricity/consumption` |  Missing   |
-| `GET` `/electricity/costs`       |  Missing   |
-| **logs endpoints**               |
-| `GET` `/logs`                    |  **Full**  |
-| `PUT` `/logs`                    |  **Full**  |
-
-Currently, all required endpoints are implemented. The mathematical background for the `/electricity/consumption` and `/electricity/costs` endpoints are known and well understood. Consumption calculation depends on weather data and home properties. The home properties are to be assessed during the installation of the thermostatic valve. Procedures to do so are known and need to be revised to match the time available for each hardware installation. The weather data depends only on the temperature, which is readily available through the free Met Norway service (using the `metno-locationforecast` package). 
+| Endpoint                    | Pos Status | 
+|:----------------------------|:----------:|
+| **heating endpoints**       |
+| `GET` `/heating/mode`       |  **Full**  |
+| `PUT` `/heating/mode`       |  **Full**  |
+| `GET` `/heating/valve`      |  **Full**  |
+| `GET` `/heating/profile`    |  **Full**  |
+| `GET` `/heating/historic`   |  **Full**  |
+| **schedule endpoints**      |
+| `GET` `/schedule`           |  **Full**  |
+| `PUT` `/schedule`           |  **Full**  |
+| **electricity endpoints**   |
+| `GET` `/electricity/prices` |  **Full**  |
+| **logs endpoints**          |
+| `GET` `/logs`               |  **Full**  |
+| `PUT` `/logs`               |  **Full**  |
+| **XAI endpoints**           |
+| `GET` `/xai/region`         |  **Full**  |
+| `PUT` `/xai/band`           |  **Full**  |

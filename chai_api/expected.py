@@ -91,3 +91,14 @@ class LogsPut:
 class ProfileGet:
     label: str
     profile: Optional[int]
+
+
+@dataclass
+class XAIGet:
+    label: str
+    profile: int
+    skip: Optional[int]
+
+    def __post_init__(self):
+        if self.skip is None or self.skip < 0:
+            self.skip = 0

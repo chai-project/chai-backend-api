@@ -105,3 +105,43 @@ class ProfileEntry:
             "bias": self.bias,
         }
         return values
+
+
+@dataclass
+class XAIRegion:
+    profile: int
+    centre_x: float
+    centre_y: float
+    angle: float
+    height: float
+    width: float
+    skip: int
+
+    def to_dict(self):  # pylint: disable=missing-function-docstring
+        values = {
+            "profile": self.profile,
+            "centre_x": round(self.centre_x, 4),
+            "centre_y": round(self.centre_y, 4),
+            "angle": self.angle,
+            "height": self.height,
+            "width": self.width,
+            "skip": self.skip,
+        }
+        return values
+
+
+@dataclass
+class XAIBand:
+    lower_confidence: List[float]
+    prediction: List[float]
+    upper_confidence: List[float]
+    skip: int
+
+    def to_dict(self):  # pylint: disable=missing-function-docstring
+        values = {
+            "lower_confidence": self.lower_confidence,
+            "prediction": self.prediction,
+            "upper_confidence": self.upper_confidence,
+            "skip": self.skip,
+        }
+        return values

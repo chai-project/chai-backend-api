@@ -31,6 +31,7 @@ from chai_api.logs import LogsResource
 from chai_api.prices import PriceResource
 from chai_api.schedule import ScheduleResource
 from chai_api.profile import ProfileResource
+from chai_api.xai import XAIRegionResource, XAIBandResource
 
 SCRIPT_PATH: str = os.path.dirname(os.path.realpath(__file__))
 WD_PATH: str = os.getcwd()
@@ -195,6 +196,8 @@ def main(settings: Configuration):
     app.add_route("/heating/profile/", ProfileResource())
     app.add_route("/heating/historic/", HistoryResource())
     app.add_route("/electricity/prices/", PriceResource())
+    app.add_route("/xai/region/", XAIRegionResource())
+    app.add_route("/xai/band/", XAIBandResource())
     app.add_route("/logs/", LogsResource())
     app.add_route("/schedule/", ScheduleResource())
     app.add_sink(Sink().on_get)  # route all unknown traffic to the sink
@@ -205,4 +208,9 @@ def main(settings: Configuration):
 
 
 if __name__ == "__main__":
-    cli()
+    # cli()
+    # for testing in IDE:
+    cli.callback(
+        "/Users/kimbauters/Library/Mobile Documents/com~apple~CloudDocs/CHAI/Programming/Python/CHAI_api/settings.toml",
+        None, None, None, None, None, None, None, False
+    )
