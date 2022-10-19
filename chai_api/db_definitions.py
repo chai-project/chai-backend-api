@@ -136,6 +136,8 @@ class Profile(Base):
     setpoint_id = Column("setpointid", Integer, ForeignKey("setpointchange.id"), nullable=False)
     mean1 = Column(Float, nullable=False)
     mean2 = Column(Float, nullable=False)
+    confidence_region = Column(JSON)
+    prediction_banded = Column(JSON)
     home: Home = relationship("Home")
     setpointChange: SetpointChange = relationship("SetpointChange")
 
