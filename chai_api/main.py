@@ -207,9 +207,4 @@ def main(settings: Configuration):
 
 
 if __name__ == "__main__":
-    # cli()
-    # for testing in IDE:
-    cli.callback(
-        "/Users/kimbauters/Library/Mobile Documents/com~apple~CloudDocs/CHAI/Programming/Python/CHAI_api/settings.toml",
-        None, None, None, None, None, None, None, False
-    )
+    cli()
