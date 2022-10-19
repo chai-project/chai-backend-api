@@ -49,7 +49,7 @@ class XAIProfileResource:
             query = db_session.query(
                 Profile
             ).filter(
-                Profile.id >= subquery
+                Profile.id >= subquery.as_scalar()
             ).filter(
                 Profile.home_id == home.id
             ).filter(
