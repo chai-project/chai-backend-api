@@ -169,10 +169,9 @@ def get_home(label: str, session: Session, token: str) -> Optional[Home]:
         Home.label == label
     ).first()
 
-    if token == "anonymous" or home.token == token:
+    if token in ("anonymous", home.token):
         return home
-    else:
-        return None
+    return None
 
 
 if __name__ == "__main__":

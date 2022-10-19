@@ -170,10 +170,9 @@ def main(settings: Configuration):
         # bearer expected, the user token must be provided as bearer,user_token
         if len(parts) == 1 and parts[0] == bearer:
             return "anonymous"
-        elif len(parts) == 2 and parts[0] == bearer:
+        if len(parts) == 2 and parts[0] == bearer:
             return parts[1]
-        else:
-            return None
+        return None
 
     auth = TokenAuth(user_loader=user_loader, auth_header_prefix="Bearer")
     auth_middleware = FalconAuthMiddleware(auth, exempt_routes=[
