@@ -216,7 +216,8 @@ class HeatingResource:
                 return
 
             changed_at = pendulum.now("Europe/London")
-            expires_at = changed_at.add(minutes=60)
+            duration = 60 if not request.timeout else request.timeout
+            expires_at = changed_at.add(minutes=duration)
 
             # noinspection PyTypeChecker
             setpoint_change = SetpointChange(
@@ -224,7 +225,8 @@ class HeatingResource:
                 # ignore the warnings; DateTime is a datetime.datetime (compatible) instance
                 changed_at=changed_at,
                 expires_at=expires_at,
-                duration=60 if not request.timeout else request.timeout, mode=request.mode.get_id(),
+                duration=duration,
+                mode=request.mode.get_id(),
                 price=get_energy_values(changed_at, changed_at, limit=1)[0].price,
                 temperature=request.target if request.mode == HeatingModeOption.AUTO else None
             )
