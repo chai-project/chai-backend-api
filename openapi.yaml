@@ -311,6 +311,8 @@ paths:
           required: true
           schema:
             type: array
+            items:
+              type: object
 
   /electricity/prices:
     get:
