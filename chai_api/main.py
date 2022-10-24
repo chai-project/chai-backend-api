@@ -258,8 +258,8 @@ def main(settings: Configuration):
     print(f"backend server running at {settings.host}:{settings.port}")
 
     try:
+        send_message(f"Starting the CHAI API server now.")
         run_server(app, settings.host, settings.port)
-        send_message(f"The CHAI API service has successfully started.")
     except OSError as err:
         send_message(f"Unable to start the CHAI API server: {err}")
 
