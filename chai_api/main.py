@@ -56,7 +56,6 @@ class Configuration:  # pylint: disable=too-few-public-methods, too-many-instanc
     db_password: str = ""
     pushover_app: str = ""
     pushover_user: str = ""
-    pushover_device: str = ""
     api_debug: bool = False
     db_debug: bool = False
 
@@ -64,7 +63,6 @@ class Configuration:  # pylint: disable=too-few-public-methods, too-many-instanc
         return (f"Configuration(host={self.host}, port={self.port}, bearer={self.bearer}, db_server={self.db_server}, "
                 f"db_name={self.db_name}, db_username={self.db_username}, db_password={self.db_password}, "
                 f"pushover_app={self.pushover_app}, pushover_user={self.pushover_user}, "
-                f"pushover_device={self.pushover_device}, "
                 f"api_debug={self.api_debug}, db_debug={self.db_debug})")
 
 
@@ -115,7 +113,6 @@ def cli(config, host, port, bearer_file, dbserver, db, username, dbpass_file, de
                 if toml_pushover := toml["pushover"]:
                     settings.pushover_app = str(toml_pushover.get("app", settings.pushover_app))
                     settings.pushover_user = str(toml_pushover.get("user", settings.pushover_user))
-                    settings.pushover_device = str(toml_pushover.get("target", settings.pushover_device))
             except tomli.TOMLDecodeError:
                 click.echo("The configuration file is not valid and cannot be parsed.")
                 sys.exit(0)
@@ -188,7 +185,7 @@ def custom_response_handler(_req, resp, _ex, _params):
 def send_message(message: str, title="CHAI API") -> None:
     if pushover is not None:
         print("sending Pushover message")
-        pushover.send_message(pushover_user, message, device=pushover_device, title=title)
+        pushover.send_message(pushover_user, message, title=title)
 
 
 # MARK: main/bootstrapping code
@@ -202,13 +199,12 @@ def main(settings: Configuration):
     #  create the token authorisation middleware
     bearer = settings.bearer
 
-    if settings.pushover_app != "" and settings.pushover_user != "" and settings.pushover_device != "":
-        global pushover, pushover_device, pushover_user
+    if settings.pushover_app != "" and settings.pushover_user != "":
+        global pushover, pushover_user
         #  create the Pushover service
         pushover = Pushover(settings.pushover_app)
         # and set the related fields
         pushover_user = settings.pushover_user
-        pushover_device = settings.pushover_device
 
     def user_loader(token: str) -> Optional[str]:
         """

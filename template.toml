@@ -21,4 +21,3 @@ debug  = false
 [pushover]
 user   = "unej..."
 app    = "a1v6..."
-target = "CHAI"
