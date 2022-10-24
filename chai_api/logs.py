@@ -62,8 +62,7 @@ class LogsResource:
     def on_put(self, req: Request, resp: Response):  # noqa
         try:
             options = req.params
-            options.update(req.media)
-            print(options)
+            options.update(req.get_media(default_when_empty=[]))  # noqa
             request: LogsPut = from_dict(LogsPut, options, config=Config({DateTime: parse}))
             db_session = req.context.session
 

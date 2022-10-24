@@ -177,7 +177,7 @@ class HeatingResource:
     def on_put(self, req: Request, resp: Response):  # noqa
         try:
             options = req.params
-            options.update(req.media)
+            options.update(req.get_media(default_when_empty=[]))  # noqa
             request: HeatingPut = from_dict(HeatingPut, options, config=Config(cast=[HeatingModeOption, int, float]))
             db_session = req.context.session
 

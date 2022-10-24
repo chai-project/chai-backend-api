@@ -17,7 +17,7 @@ class PriceResource:
     def on_get(self, req: Request, resp: Response):  # noqa
         try:
             options = req.params
-            options.update(req.media)
+            options.update(req.get_media(default_when_empty=[]))  # noqa
             request: PricesGet = from_dict(PricesGet, options, config=Config({DateTime: parse}, cast=[int]))
             print(request)
 
