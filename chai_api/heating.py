@@ -81,7 +81,7 @@ class HeatingResource:
                 SetpointChange.id.desc()
             ).first()
 
-            if active_setpoint is not None:
+            if active_setpoint is not None and (active_setpoint.mode != 1 or active_setpoint.temperature is not None):
                 resp.content_type = falcon.MEDIA_JSON
                 option = HeatingModeOption.OVERRIDE if active_setpoint.mode == 1 else (
                     HeatingModeOption.ON if active_setpoint.mode == 2 else HeatingModeOption.OFF
@@ -187,12 +187,7 @@ class HeatingResource:
                 return
 
             if request.mode == HeatingModeOption.AUTO:
-                if request.target is None:
-                    resp.content_type = falcon.MEDIA_TEXT
-                    resp.text = "target temperature expected for auto mode"
-                    resp.status = falcon.HTTP_BAD_REQUEST
-                    return
-                if not 7 <= request.target <= 30:
+                if request.target is not None and (not 7 <= request.target <= 30):
                     resp.content_type = falcon.MEDIA_TEXT
                     resp.text = "target temperature expected between 7 and 30"
                     resp.status = falcon.HTTP_BAD_REQUEST
