@@ -15,6 +15,7 @@ import tomli
 from falcon import App
 from falcon_auth import FalconAuthMiddleware, TokenAuthBackend as TokenAuth
 from falcon_sqla import Manager as SessionManager
+from pushover_complete import PushoverAPI as Pushover
 
 try:
     from bjoern import run as run_server
@@ -36,6 +37,12 @@ from chai_api.xai import XAIRegionResource, XAIBandResource, XAIScatterResource
 
 SCRIPT_PATH: str = os.path.dirname(os.path.realpath(__file__))
 WD_PATH: str = os.getcwd()
+pushover: Optional[Pushover] = None
+pushover_user: str = ""
+pushover_device: str = ""
+
+
+# MARK: CLI handling instances and functions
 
 
 class Configuration:  # pylint: disable=too-few-public-methods, too-many-instance-attributes
@@ -47,12 +54,17 @@ class Configuration:  # pylint: disable=too-few-public-methods, too-many-instanc
     db_name: str = "chai"
     db_username: str = ""
     db_password: str = ""
+    pushover_app: str = ""
+    pushover_user: str = ""
+    pushover_device: str = ""
     api_debug: bool = False
     db_debug: bool = False
 
     def __str__(self):
         return (f"Configuration(host={self.host}, port={self.port}, bearer={self.bearer}, db_server={self.db_server}, "
                 f"db_name={self.db_name}, db_username={self.db_username}, db_password={self.db_password}, "
+                f"pushover_app={self.pushover_app}, pushover_user={self.pushover_user}, "
+                f"pushover_device={self.pushover_device}, "
                 f"api_debug={self.api_debug}, db_debug={self.db_debug})")
 
 
@@ -100,6 +112,10 @@ def cli(config, host, port, bearer_file, dbserver, db, username, dbpass_file, de
                     settings.db_username = str(toml_db.get("user", settings.db_username))
                     settings.db_password = str(toml_db.get("pass", settings.db_password))
                     settings.db_debug = bool(toml_db.get("debug", settings.db_debug))
+                if toml_pushover := toml["pushover"]:
+                    settings.pushover_app = str(toml_pushover.get("app", settings.pushover_app))
+                    settings.pushover_user = str(toml_pushover.get("user", settings.pushover_user))
+                    settings.pushover_device = str(toml_pushover.get("target", settings.pushover_device))
             except tomli.TOMLDecodeError:
                 click.echo("The configuration file is not valid and cannot be parsed.")
                 sys.exit(0)
@@ -152,17 +168,30 @@ def cli(config, host, port, bearer_file, dbserver, db, username, dbpass_file, de
     main(settings)
 
 
+# MARK: error handling functions
+
+
 def custom_response_handler(_req, resp, _ex, _params):
     """
     Handle unhandled and/or unexpected exceptions here.
     This simply overrides and mimics the default mechanism in falcon to return a HTTP Error of 500.
     The key difference is that it provides a hook for custom messaging, e.g. using Pushover.
     """
+    send_message(f"The CHAI API server encountered an unhandled exception: {_ex}.")
     resp.status = falcon.HTTP_500
     resp.content_type = falcon.MEDIA_JSON
     resp.content = {}
     resp.vary = ("Accept", )
     resp.text = json.dumps({"title": "500 Internal Server Error"})
+
+
+def send_message(message: str, title="CHAI API") -> None:
+    if pushover is not None:
+        print("sending Pushover message")
+        pushover.send_message(pushover_user, message, device=pushover_device, title=title)
+
+
+# MARK: main/bootstrapping code
 
 
 def main(settings: Configuration):
@@ -172,6 +201,14 @@ def main(settings: Configuration):
     """
     #  create the token authorisation middleware
     bearer = settings.bearer
+
+    if settings.pushover_app != "" and settings.pushover_user != "" and settings.pushover_device != "":
+        global pushover, pushover_device, pushover_user
+        #  create the Pushover service
+        pushover = Pushover(settings.pushover_app)
+        # and set the related fields
+        pushover_user = settings.pushover_user
+        pushover_device = settings.pushover_device
 
     def user_loader(token: str) -> Optional[str]:
         """
@@ -220,7 +257,10 @@ def main(settings: Configuration):
 
     print(f"backend server running at {settings.host}:{settings.port}")
 
-    run_server(app, settings.host, settings.port)
+    try:
+        run_server(app, settings.host, settings.port)
+    except OSError as err:
+        send_message(f"Unable to start the CHAI API server: {err}")
 
 
 if __name__ == "__main__":

@@ -17,3 +17,8 @@ dbname = "chai"
 user   = "api_access"
 pass   = "db_password_here"
 debug  = false
+
+[pushover]
+user   = "unej..."
+app    = "a1v6..."
+target = "CHAI"
