@@ -4,6 +4,7 @@
 
 from __future__ import annotations
 
+import json
 import os
 import sys
 from typing import Optional
@@ -151,6 +152,19 @@ def cli(config, host, port, bearer_file, dbserver, db, username, dbpass_file, de
     main(settings)
 
 
+def custom_response_handler(_req, resp, _ex, _params):
+    """
+    Handle unhandled and/or unexpected exceptions here.
+    This simply overrides and mimics the default mechanism in falcon to return a HTTP Error of 500.
+    The key difference is that it provides a hook for custom messaging, e.g. using Pushover.
+    """
+    resp.status = falcon.HTTP_500
+    resp.content_type = falcon.MEDIA_JSON
+    resp.content = {}
+    resp.vary = ("Accept", )
+    resp.text = json.dumps({"title": "500 Internal Server Error"})
+
+
 def main(settings: Configuration):
     """
     Main entry point for the API server.
@@ -200,6 +214,8 @@ def main(settings: Configuration):
     app.add_route("/xai/scatter/", XAIScatterResource())
     app.add_route("/logs/", LogsResource())
     app.add_route("/schedule/", ScheduleResource())
+
+    app.add_error_handler(Exception, custom_response_handler)  # handle unhandled/unexpected exceptions
     app.add_sink(Sink().on_get)  # route all unknown traffic to the sink
 
     print(f"backend server running at {settings.host}:{settings.port}")
