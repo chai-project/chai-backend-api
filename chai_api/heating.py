@@ -140,7 +140,6 @@ class HeatingResource:
             profiles_schedule.sort(key=lambda x: x[0], reverse=True)
             # find the first profile with a slot less than or equal to the slot for the current datetime
             current_profile = next(filter(lambda entry: entry[0] <= slot, profiles_schedule), None)
-            print(f"profile: {current_profile}")
 
             # fetch this profile from the database
             subquery = db_session.query(func.max(Profile.id)).filter(
