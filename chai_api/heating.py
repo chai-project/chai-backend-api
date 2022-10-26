@@ -181,8 +181,8 @@ def set_netatmo_heating(device: NetatmoDevice, temperature: float, mode: Heating
         valve_mode = SetpointMode.OFF
         temperature = None
     if mode == HeatingModeOption.ON:
-        valve_mode = SetpointMode.MAX
-        temperature = None
+        valve_mode = SetpointMode.MANUAL
+        temperature = 30
 
     if temperature is not None:
         temperature = int(temperature)
