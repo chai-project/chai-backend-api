@@ -110,7 +110,7 @@ def cli(config, host, port, bearer_file, dbserver, db, username, dbpass_file, de
                     settings.api_debug = bool(toml_server.get("debug", settings.api_debug))
                 if toml_db := toml["database"]:
                     settings.db_server = str(toml_db.get("server", settings.db_server))
-                    settings.db_name = str(toml_db.get("name", settings.db_name))
+                    settings.db_name = str(toml_db.get("dbname", settings.db_name))
                     settings.db_username = str(toml_db.get("user", settings.db_username))
                     settings.db_password = str(toml_db.get("pass", settings.db_password))
                     settings.db_debug = bool(toml_db.get("debug", settings.db_debug))
