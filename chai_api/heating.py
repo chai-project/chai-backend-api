@@ -175,8 +175,11 @@ def set_netatmo_heating(device: NetatmoDevice, temperature: float, mode: Heating
         valve_mode = SetpointMode.MAX
         temperature = None
 
+    if temperature is not None:
+        temperature = int(temperature)
+
     print(f"setting {device.refreshToken} to {int(temperature)}°C in mode {valve_mode}")
-    return client.set_device(device=DeviceType.VALVE, mode=valve_mode, temperature=int(temperature), minutes=60)
+    return client.set_device(device=DeviceType.VALVE, mode=valve_mode, temperature=temperature, minutes=60)
 
 
 class HeatingResource:
