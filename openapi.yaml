@@ -373,7 +373,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/XAIRegion'
         '204':
-          description: "Passed the last XAI region for this profile."
+          description: "Passed the last XAI region for this profile, and not able to return a default."
+        '206':
+          description: "Passed the last XAI region for this profile, and returned the default profile configuration."
         '400':
           description: "The provided label is invalid, or the provided profile is invalid."
         '401':
@@ -418,7 +420,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/XAIBand'
         '204':
-          description: "Passed the last XAI band for this profile."
+          description: "Passed the last XAI band for this profile, and not able to return a default."
+        '206':
+          description: "Passed the last XAI band for this profile, and returned the default profile configuration."
         '400':
           description: "The provided label is invalid, or the provided profile is invalid."
         '401':

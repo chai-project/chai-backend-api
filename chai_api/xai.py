@@ -14,8 +14,28 @@ from chai_api.expected import XAIGet
 from chai_api.responses import XAIRegion, XAIBand, XAIScatter, XAIScatterEntry
 
 
+class ConfigurationProfile:
+    mean1: float = 0.0
+    mean2: float = 0.0
+    variance1: float = 0.0
+    variance2: float = 0.0
+    noiseprecision: float = 0.0
+    correlation1: float = 0.0
+    correlation2: float = 0.0
+    region_angle: float = 0.0
+    region_width: float = 0.0
+    region_height: float = 0.0
+    prediction_banded = List[List[float]]
+
+
 class XAIProfileResource:
-    def get_profile(self, req: Request, resp: Response, parameters: XAIGet, all: bool = False) -> (bool, Optional[Profile]):  # noqa
+    profile: Optional[List[ConfigurationProfile]]
+
+    def __init__(self, profiles: List[ConfigurationProfile]):
+        self.profiles = profiles
+
+    def get_profile(self, req: Request, resp: Response, parameters: XAIGet, all: bool = False) -> (
+    bool, Optional[Profile]):  # noqa
         try:
             if parameters.profile < 1 or parameters.profile > 5:
                 resp.content_type = falcon.MEDIA_TEXT
@@ -93,7 +113,17 @@ class XAIRegionResource(XAIProfileResource):
                     resp.text = json.dumps(response.to_dict())
                     resp.status = falcon.HTTP_OK
                 else:
-                    resp.status = falcon.HTTP_NO_CONTENT
+                    if len(self.profiles) >= parameters.profile:
+                        default_profile = self.profiles[parameters.profile - 1]
+                        response = XAIRegion(
+                            profile=parameters.profile, centre_x=default_profile.mean1, centre_y=default_profile.mean2,
+                            angle=default_profile.region_angle, width=default_profile.region_width,
+                            height=default_profile.region_height, skip=parameters.skip
+                        )
+                        resp.text = json.dumps(response.to_dict())
+                        resp.status = falcon.HTTP_PARTIAL_CONTENT
+                    else:
+                        resp.status = falcon.HTTP_NO_CONTENT
         except DaciteError as err:
             resp.content_type = falcon.MEDIA_TEXT
             resp.status = falcon.HTTP_BAD_REQUEST
@@ -123,7 +153,16 @@ class XAIBandResource(XAIProfileResource):
                     resp.text = json.dumps(response.to_dict())
                     resp.status = falcon.HTTP_OK
                 else:
-                    resp.status = falcon.HTTP_NO_CONTENT
+                    if len(self.profiles) >= parameters.profile:
+                        default_profile = self.profiles[parameters.profile - 1]
+                        band: List[List[float]] = list(zip(*default_profile.prediction_banded))  # noqa
+                        response = XAIBand(
+                            lower_confidence=band[0], prediction=band[1], upper_confidence=band[2], skip=parameters.skip
+                        )
+                        resp.text = json.dumps(response.to_dict())
+                        resp.status = falcon.HTTP_PARTIAL_CONTENT
+                    else:
+                        resp.status = falcon.HTTP_NO_CONTENT
         except DaciteError as err:
             resp.content_type = falcon.MEDIA_TEXT
             resp.status = falcon.HTTP_BAD_REQUEST
@@ -147,7 +186,6 @@ class XAIScatterResource(XAIProfileResource):
                         XAIScatterEntry(result.setpointChange.price, result.setpointChange.temperature)
                         for result in results if result.setpointChange and result.setpointChange.temperature is not None
                     ]
-                    print(entries)
                     response = XAIScatter(entries, len(entries))
                 resp.content_type = falcon.MEDIA_JSON
                 if response:

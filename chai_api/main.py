@@ -33,7 +33,7 @@ from chai_api.logs import LogsResource
 from chai_api.prices import PriceResource
 from chai_api.schedule import ScheduleResource
 from chai_api.profile import ProfileResource
-from chai_api.xai import XAIRegionResource, XAIBandResource, XAIScatterResource
+from chai_api.xai import XAIRegionResource, XAIBandResource, XAIScatterResource, ConfigurationProfile
 
 SCRIPT_PATH: str = os.path.dirname(os.path.realpath(__file__))
 WD_PATH: str = os.getcwd()
@@ -43,20 +43,6 @@ pushover_device: str = ""
 
 
 # MARK: CLI handling instances and functions
-
-
-class ConfigurationProfile:
-    mean1: float = 0.0
-    mean2: float = 0.0
-    variance1: float = 0.0
-    variance2: float = 0.0
-    noiseprecision: float = 0.0
-    correlation1: float = 0.0
-    correlation2: float = 0.0
-    region_angle: float = 0.0
-    region_width: float = 0.0
-    region_height: float = 0.0
-    prediction_banded = List[List[float]]
 
 
 class Configuration:  # pylint: disable=too-few-public-methods, too-many-instance-attributes
@@ -286,9 +272,9 @@ def main(settings: Configuration):
     app.add_route("/heating/profile/", ProfileResource())
     app.add_route("/heating/historic/", HistoryResource())
     app.add_route("/electricity/prices/", PriceResource())
-    app.add_route("/xai/region/", XAIRegionResource())
-    app.add_route("/xai/band/", XAIBandResource())
-    app.add_route("/xai/scatter/", XAIScatterResource())
+    app.add_route("/xai/region/", XAIRegionResource(settings.profiles))
+    app.add_route("/xai/band/", XAIBandResource(settings.profiles))
+    app.add_route("/xai/scatter/", XAIScatterResource(settings.profiles))
     app.add_route("/logs/", LogsResource())
     app.add_route("/schedule/", ScheduleResource())
 
