@@ -178,7 +178,7 @@ def set_netatmo_heating(device: NetatmoDevice, temperature: float, mode: Heating
     if temperature is not None:
         temperature = int(temperature)
 
-    print(f"setting {device.refreshToken} to {int(temperature)}°C in mode {valve_mode}")
+    print(f"setting {device.refreshToken} to {temperature}°C in mode {valve_mode}")
     return client.set_device(device=DeviceType.VALVE, mode=valve_mode, temperature=temperature, minutes=60)
 
 
@@ -459,4 +459,8 @@ def main(*, db_server: str, db_name: str, db_username: str, db_password: str,
 
 
 if __name__ == "__main__":
-    cli()
+    # cli()
+    # testing code
+    cli.callback(
+        "/Users/kimbauters/Library/Mobile Documents/com~apple~CloudDocs/CHAI/Programming/Python/CHAI_api/settings.toml"
+    )
