@@ -8,9 +8,10 @@ from typing import Optional
 from sqlalchemy import Column, String, Integer, Float, DateTime, ForeignKey, TIMESTAMP, Index, JSON
 from sqlalchemy import and_
 from sqlalchemy import create_engine
+from sqlalchemy.engine import Engine
 from sqlalchemy.orm import aliased
 from sqlalchemy.orm import relationship, declarative_base
-from sqlalchemy.orm import scoped_session, Session
+from sqlalchemy.orm import scoped_session, Session, sessionmaker
 
 
 @dataclass
@@ -50,6 +51,21 @@ def db_session(st_session: scoped_session):
     :return: A database session.
     """
     _session = st_session()
+    try:
+        yield _session
+        _session.commit()
+    finally:
+        _session.close()
+
+
+@contextmanager
+def db_session_manager(engine: Engine) -> Session:
+    """
+    A context manager that yields a database connection.
+    :param engine: The database engine to bind the session to.
+    :return: A database session.
+    """
+    _session = sessionmaker(engine)()
     try:
         yield _session
         _session.commit()
