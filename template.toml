@@ -21,3 +21,32 @@ debug  = false
 [pushover]
 user   = "unej..."
 app    = "a1v6..."
+
+[profiles]
+number = 2
+
+[profiles.1]
+mean1 = 23
+mean2 = -0.05
+variance1 = 1
+variance2 = 0.01
+noiseprecision = 0.1
+correlation1 = 0
+correlation2 = 0
+region_angle = 360
+region_width = 0.4
+region_height = 4.0
+prediction_banded = [[14.46, 23.0, 31.54], [14.4, 22.95, 31.5]]
+
+[profiles.2]
+mean1 = 23
+mean2 = -0.05
+variance1 = 1
+variance2 = 0.01
+noiseprecision = 0.1
+correlation1 = 0
+correlation2 = 0
+region_angle = 360
+region_width = 0.4
+region_height = 4.0
+prediction_banded = [[14.46, 23.0, 31.54], [14.4, 22.95, 31.5]]

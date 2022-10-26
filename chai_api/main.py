@@ -7,7 +7,7 @@ from __future__ import annotations
 import json
 import os
 import sys
-from typing import Optional
+from typing import Optional, List
 
 import click
 import falcon
@@ -45,6 +45,20 @@ pushover_device: str = ""
 # MARK: CLI handling instances and functions
 
 
+class ConfigurationProfile:
+    mean1: float = 0.0
+    mean2: float = 0.0
+    variance1: float = 0.0
+    variance2: float = 0.0
+    noiseprecision: float = 0.0
+    correlation1: float = 0.0
+    correlation2: float = 0.0
+    region_angle: float = 0.0
+    region_width: float = 0.0
+    region_height: float = 0.0
+    prediction_banded = List[List[float]]
+
+
 class Configuration:  # pylint: disable=too-few-public-methods, too-many-instance-attributes
     """ Configuration used by the API server. """
     host: str = "0.0.0.0"
@@ -58,6 +72,7 @@ class Configuration:  # pylint: disable=too-few-public-methods, too-many-instanc
     pushover_user: str = ""
     api_debug: bool = False
     db_debug: bool = False
+    profiles: List[ConfigurationProfile] = []
 
     def __str__(self):
         return (f"Configuration(host={self.host}, port={self.port}, bearer={self.bearer}, db_server={self.db_server}, "
@@ -113,8 +128,38 @@ def cli(config, host, port, bearer_file, dbserver, db, username, dbpass_file, de
                 if toml_pushover := toml["pushover"]:
                     settings.pushover_app = str(toml_pushover.get("app", settings.pushover_app))
                     settings.pushover_user = str(toml_pushover.get("user", settings.pushover_user))
+                if "profiles" in toml:
+                    if toml_pushover := toml["profiles"]:
+                        expected_profiles = int(toml_pushover.get("number", 0))
+                        profiles = []
+                        for index in range(expected_profiles):
+                            new_profile = ConfigurationProfile
+                            if profile := toml_pushover[f"{index + 1}"]:
+                                new_profile.mean1 = float(profile["mean1"])
+                                new_profile.mean2 = float(profile["mean2"])
+                                new_profile.variance1 = float(profile["variance1"])
+                                new_profile.variance2 = float(profile["variance2"])
+                                new_profile.noiseprecision = float(profile["noiseprecision"])
+                                new_profile.correlation1 = float(profile["correlation1"])
+                                new_profile.correlation2 = float(profile["correlation2"])
+                                new_profile.region_angle = float(profile["region_angle"])
+                                new_profile.region_width = float(profile["region_width"])
+                                new_profile.region_height = float(profile["region_height"])
+                                new_profile.prediction_banded = profile["prediction_banded"]
+                                assert len(new_profile.prediction_banded) == 36
+                                assert all(len(entry) == 3 for entry in new_profile.prediction_banded)  # noqa
+                                profiles.append(new_profile)
+                        settings.profiles = profiles
+                        print(profiles)
+
             except tomli.TOMLDecodeError:
                 click.echo("The configuration file is not valid and cannot be parsed.")
+                sys.exit(0)
+            except KeyError as err:
+                click.echo(f"The configuration file is missing some expected values: {err}.")
+                sys.exit(0)
+            except AssertionError:
+                click.echo("Make sure the prediction_banded list for each profile has 36 entries, each of 3 elements.")
                 sys.exit(0)
 
     # some entries may not be present in the TOML file, or they may be overridden by explicit CLI arguments
