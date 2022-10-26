@@ -22,6 +22,10 @@ debug  = false
 user   = "unej..."
 app    = "a1v6..."
 
+[netatmo]
+client_id     = "5a3..."
+client_secret = "eQd..."
+
 [profiles]
 number = 2
 

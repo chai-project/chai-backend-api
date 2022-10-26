@@ -18,9 +18,16 @@ from chai_api.responses import HeatingMode, HeatingModeOption, ValveStatus
 
 
 class HeatingResource:
+    client_id: str = ""
+    client_secret: str = ""
+
+    def __init__(self, client_id, client_secret):
+        self.client_id = client_id
+        self.client_secret = client_secret
+
     def on_get(self, req: Request, resp: Response):  # noqa
         try:
-            request: HeatingGet = from_dict(HeatingGet, req.params)
+            request: HeatingGet = from_dict(HeatingGet, req.params)  # noqa
             db_session = req.context.session
 
             # find the correct home for the user

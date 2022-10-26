@@ -57,6 +57,8 @@ class Configuration:  # pylint: disable=too-few-public-methods, too-many-instanc
     db_password: str = ""
     pushover_app: str = ""
     pushover_user: str = ""
+    netatmo_id: str = ""
+    netatmo_secret: str = ""
     api_debug: bool = False
     db_debug: bool = False
     profiles: List[ConfigurationProfile] = []
@@ -115,6 +117,9 @@ def cli(config, host, port, bearer_file, dbserver, db, username, dbpass_file, de
                 if toml_pushover := toml["pushover"]:
                     settings.pushover_app = str(toml_pushover.get("app", settings.pushover_app))
                     settings.pushover_user = str(toml_pushover.get("user", settings.pushover_user))
+                if toml_netatmo := toml["netatmo"]:
+                    settings.netatmo_id = str(toml_netatmo["client_id"])
+                    settings.netatmo_secret = str(toml_netatmo["client_secret"])
                 if "profiles" in toml:
                     if toml_pushover := toml["profiles"]:
                         expected_profiles = int(toml_pushover.get("number", 0))
@@ -269,7 +274,7 @@ def main(settings: Configuration):
     app = falcon.App(middleware=[auth_middleware, session_middleware] if bearer is not None else [session_middleware])
 
     # create routes to resource instances
-    app.add_route("/heating/mode/", HeatingResource())
+    app.add_route("/heating/mode/", HeatingResource(settings.netatmo_id, settings.netatmo_secret))
     app.add_route("/heating/valve/", ValveResource())
     app.add_route("/heating/profile/", ProfileResource())
     app.add_route("/heating/historic/", HistoryResource())
