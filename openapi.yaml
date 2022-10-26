@@ -476,7 +476,7 @@ paths:
           description: "The server experience an internal error."
       summary: "Get the previous setpoint changes and at what price points they happened for use in the XAI scatter plot and for the given parameters."
       description: ""
-      operationId: "getXAIScappter"
+      operationId: "getXAIScatter"
       parameters:
         - name: label
           in: query
