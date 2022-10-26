@@ -150,7 +150,6 @@ def cli(config, host, port, bearer_file, dbserver, db, username, dbpass_file, de
                                 assert all(len(entry) == 3 for entry in new_profile.prediction_banded)  # noqa
                                 profiles.append(new_profile)
                         settings.profiles = profiles
-                        print(profiles)
 
             except tomli.TOMLDecodeError:
                 click.echo("The configuration file is not valid and cannot be parsed.")
