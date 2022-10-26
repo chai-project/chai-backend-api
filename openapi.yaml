@@ -22,6 +22,8 @@ tags:
   description: "Get the logs related to the AI."
 - name: "xai"
   description: "Get eXplainable AI information on a given profile."
+- name: "reset"
+  description: "Reset profiles back to their default."
 
 paths:
   /heating/mode:
@@ -485,6 +487,38 @@ paths:
         - name: profile
           in: query
           description: "The profile of the home for which you are requesting the XAI band."
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 5
+
+  /profile/reset:
+    get:
+      tags:
+        - reset
+      responses:
+        '200':
+          description: "The desired profile has been reset."
+        '400':
+          description: "The provided label is invalid, or the provided profile is invalid."
+        '401':
+          description: "The bearer token is not provided or is invalid."
+        '500':
+          description: "The server experience an internal error."
+      summary: "Reset a given profile to its default settings."
+      description: ""
+      operationId: "resetProfile"
+      parameters:
+        - name: label
+          in: query
+          description: "The unique label of the home for which you want to reset the profile."
+          required: true
+          schema:
+            type: string
+        - name: profile
+          in: query
+          description: "The profile of the home which you want to reset."
           required: true
           schema:
             type: integer

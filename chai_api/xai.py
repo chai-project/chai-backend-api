@@ -19,7 +19,7 @@ class ConfigurationProfile:
     mean2: float = 0.0
     variance1: float = 0.0
     variance2: float = 0.0
-    noiseprecision: float = 0.0
+    noiseprecision: float = 0.0  # noqa
     correlation1: float = 0.0
     correlation2: float = 0.0
     region_angle: float = 0.0
@@ -193,6 +193,59 @@ class XAIScatterResource(XAIProfileResource):
                     resp.status = falcon.HTTP_OK
                 else:
                     resp.status = falcon.HTTP_NO_CONTENT
+        except DaciteError as err:
+            resp.content_type = falcon.MEDIA_TEXT
+            resp.status = falcon.HTTP_BAD_REQUEST
+            resp.text = f"one or more of the parameters was not understood\n{err}"
+        except ValueError as err:
+            resp.content_type = falcon.MEDIA_TEXT
+            resp.status = falcon.HTTP_BAD_REQUEST
+            resp.text = f"one or more of the parameters has an invalid value:\n{err}"
+
+
+class ProfileResetResource:
+    profile: Optional[List[ConfigurationProfile]]
+
+    def __init__(self, profiles: List[ConfigurationProfile]):
+        self.profiles = profiles
+
+    def on_get(self, req: Request, resp: Response):  # noqa
+        try:
+            parameters: XAIGet = from_dict(XAIGet, req.params, config=Config(cast=[int]))
+
+            if parameters.profile < 1 or parameters.profile > 5:
+                resp.content_type = falcon.MEDIA_TEXT
+                resp.text = "invalid value for profile, expected a value between 1 and 5 (inclusive)"
+                resp.status = falcon.HTTP_BAD_REQUEST
+                return
+
+            if len(self.profiles) < parameters.profile:
+                resp.content_type = falcon.MEDIA_TEXT
+                resp.status = falcon.HTTP_BAD_REQUEST
+                resp.text = f"the profile {parameters.profile} cannot be reset as its default values are not known"
+                return
+            default_profile = self.profiles[parameters.profile - 1]
+
+            db_session = req.context.session
+
+            # find the correct home for the user
+            home = get_home(parameters.label, db_session, req.context.get("user", "anonymous"))
+
+            if home is None:
+                resp.content_type = falcon.MEDIA_TEXT
+                resp.text = "unknown home label, or invalid home token"
+                resp.status = falcon.HTTP_BAD_REQUEST
+                return
+
+            new_profile = Profile(
+                profile_id=parameters.profile, home_id=home.id,
+                mean1=default_profile.mean1, mean2=default_profile.mean2,
+                variance1=default_profile.variance1, variance2=default_profile.variance2,
+                noiseprecision=default_profile.noiseprecision,
+                correlation1=default_profile.correlation1, correlation2=default_profile.correlation2
+            )
+            db_session.add(new_profile)
+            db_session.commit()
         except DaciteError as err:
             resp.content_type = falcon.MEDIA_TEXT
             resp.status = falcon.HTTP_BAD_REQUEST

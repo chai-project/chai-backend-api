@@ -34,6 +34,7 @@ from chai_api.prices import PriceResource
 from chai_api.schedule import ScheduleResource
 from chai_api.profile import ProfileResource
 from chai_api.xai import XAIRegionResource, XAIBandResource, XAIScatterResource, ConfigurationProfile
+from chai_api.xai import ProfileResetResource
 
 SCRIPT_PATH: str = os.path.dirname(os.path.realpath(__file__))
 WD_PATH: str = os.getcwd()
@@ -278,6 +279,7 @@ def main(settings: Configuration):
     app.add_route("/xai/scatter/", XAIScatterResource(settings.profiles))
     app.add_route("/logs/", LogsResource())
     app.add_route("/schedule/", ScheduleResource())
+    app.add_route("/profile/reset/", ProfileResetResource(settings.profiles))
 
     app.add_error_handler(Exception, custom_response_handler)  # handle unhandled/unexpected exceptions
     app.add_sink(Sink().on_get)  # route all unknown traffic to the sink
