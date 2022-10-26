@@ -2,19 +2,26 @@
 # # pylint: disable=no-member, c-extension-no-member, too-few-public-methods
 # # pylint: disable=missing-class-docstring, missing-function-docstring
 
+import os
+import sys
 from dataclasses import dataclass
 from typing import Optional
 
+import click
 import falcon
 import pendulum
+import tomli
 import ujson as json
+from chai_data_sources import NetatmoClient, SetpointMode, DeviceType
 from dacite import from_dict, DaciteError, Config
 from falcon import Request, Response
+from pushover_complete import PushoverAPI as Pushover
 from sqlalchemy import and_
 from sqlalchemy.orm import aliased, Session
 from sqlalchemy.sql.expression import func
 
-from chai_api.db_definitions import NetatmoReading, NetatmoDevice, get_home, SetpointChange, Schedule, Profile
+from chai_api.db_definitions import NetatmoReading, NetatmoDevice, get_home, SetpointChange, Schedule, Profile, Home
+from chai_api.db_definitions import db_engine_manager, db_session_manager, Configuration as DBConfiguration
 from chai_api.energy_loop import get_energy_values, ElectricityPrice
 from chai_api.expected import HeatingGet, HeatingPut
 from chai_api.responses import HeatingMode, HeatingModeOption, ValveStatus
@@ -144,7 +151,7 @@ def get_heating_status(home_id: int, db_session: Session) -> HeatingStatus:
 
 
 def set_netatmo_heating(device: NetatmoDevice, temperature: float, mode: HeatingModeOption,
-                        client_id: str, client_secret: str, db_session: Session) -> bool:
+                        client_id: str, client_secret: str) -> bool:
     """
     Set the Netatmo device to the desired temperature
     :param device: The Netatmo device to manipulate.
@@ -155,23 +162,21 @@ def set_netatmo_heating(device: NetatmoDevice, temperature: float, mode: Heating
     :param db_session: The database session to use when accessing DB information.
     :return: The current heating status.
     """
-    print(f"simulating Netatmo setting with {client_id} and {client_secret}, for {device.refreshToken} to {temperature}°C on {mode}")
-    return True
+    client = NetatmoClient(
+        client_id=client_id,
+        client_secret=client_secret,
+        refresh_token=device.refreshToken
+    )
+    valve_mode = SetpointMode.MANUAL
+    if mode == HeatingModeOption.OFF:
+        valve_mode = SetpointMode.OFF
+        temperature = None
+    if mode == HeatingModeOption.ON:
+        valve_mode = SetpointMode.MAX
+        temperature = None
 
-    # client = NetatmoClient(
-    #     client_id=client_id,
-    #     client_secret=client_secret,
-    #     refresh_token=device.refreshToken
-    # )
-    # valve_mode = SetpointMode.MANUAL
-    # if mode == HeatingModeOption.OFF:
-    #     valve_mode = SetpointMode.OFF
-    #     temperature = None
-    # if mode == HeatingModeOption.ON:
-    #     valve_mode = SetpointMode.MAX
-    #     temperature = None
-    #
-    # return client.set_device(device=DeviceType.VALVE, mode=valve_mode, temperature=temperature, minutes=60)
+    print(f"setting {device.refreshToken} to {int(temperature)}°C in mode {valve_mode}")
+    return client.set_device(device=DeviceType.VALVE, mode=valve_mode, temperature=int(temperature), minutes=60)
 
 
 class HeatingResource:
@@ -314,7 +319,7 @@ class HeatingResource:
             heating_status = get_heating_status(home.id, db_session)
             set_netatmo_heating(
                 home.relay, heating_status.temperature, heating_status.mode,
-                self.client_id, self.client_secret, db_session
+                self.client_id, self.client_secret
             )
 
             resp.content_type = falcon.MEDIA_JSON
@@ -364,3 +369,91 @@ class ValveResource:
             resp.content_type = falcon.MEDIA_TEXT
             resp.status = falcon.HTTP_BAD_REQUEST
             resp.text = f"one or more of the parameters was not understood\n{err}"
+
+
+@click.command()
+@click.option("--config", default=None, help="The TOML configuration file.")
+def cli(config):  # pylint: disable=invalid-name
+    db_server = ""
+    db_name = ""
+    db_username = ""
+    db_password = ""
+    pushover_app = ""
+    pushover_user = ""
+    netatmo_id = ""
+    netatmo_secret = ""
+
+    if config and not os.path.isfile(config):
+        click.echo("The configuration file is not found. Please provide a valid file path.")
+        sys.exit(0)
+
+    if config:
+        with open(config, "rb") as file:
+            try:
+                toml = tomli.load(file)
+
+                if toml_db := toml["database"]:
+                    db_server = str(toml_db["server"])
+                    db_name = str(toml_db["dbname"])
+                    db_username = str(toml_db["user"])
+                    db_password = str(toml_db["pass"])
+                if toml_pushover := toml["pushover"]:
+                    pushover_app = str(toml_pushover["app"])
+                    pushover_user = str(toml_pushover["user"])
+                if toml_netatmo := toml["netatmo"]:
+                    netatmo_id = str(toml_netatmo["client_id"])
+                    netatmo_secret = str(toml_netatmo["client_secret"])
+
+                main(
+                    db_server=db_server, db_name=db_name, db_username=db_username, db_password=db_password,
+                    pushover_app=pushover_app, pushover_user=pushover_user,
+                    client_id=netatmo_id, client_secret=netatmo_secret
+                )
+
+            except tomli.TOMLDecodeError:
+                click.echo("The configuration file is not valid and cannot be parsed.")
+                sys.exit(0)
+            except KeyError as err:
+                click.echo(f"The configuration file is missing some expected values: {err}.")
+                sys.exit(0)
+            except AssertionError:
+                click.echo("Make sure the prediction_banded list for each profile has 36 entries, each of 3 elements.")
+                sys.exit(0)
+
+
+def main(*, db_server: str, db_name: str, db_username: str, db_password: str,
+         pushover_app: str, pushover_user: str, client_id: str, client_secret: str):
+
+    pushover = Pushover(pushover_app)
+
+    def send_message(message: str, title="CHAI API Netatmo") -> None:
+        if pushover is not None:
+            print("sending Pushover message")
+            pushover.send_message(pushover_user, message, title=title)
+
+    # connect to the database
+    with db_engine_manager(DBConfiguration(db_server, db_username, db_password, db_name)) as db_engine:
+        with db_session_manager(db_engine) as session:
+            # fetch all active homes
+            home_alias = aliased(Home)
+            homes = session.query(
+                Home
+            ).outerjoin(
+                home_alias, and_(Home.label == home_alias.label, Home.revision < home_alias.revision)
+            ).filter(
+                home_alias.revision == None  # noqa: E711
+            ).all()
+
+            for home in homes:
+                # calculate the desired temperature point
+                status = get_heating_status(home.id, session)
+                # make the Netatmo call to change the temperature
+                try:
+                    set_netatmo_heating(home.relay, status.temperature, status.mode, client_id, client_secret)
+                    print(f"set the Netatmo valve for the property with the label {home.label}")
+                except Exception as _err:  # noqa
+                    send_message(f"Failed to set the Netatmo valve for the property with label {home.label}.")
+
+
+if __name__ == "__main__":
+    cli()
