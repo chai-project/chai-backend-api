@@ -31,15 +31,24 @@ class MissingPriceError(Exception):
     """ Raised when a price is missing for a given time. """
     pass
 
+    def __str__(self):
+        return f"MissingPriceError"
+
 
 class MissingScheduleError(Exception):
     """ Raised when a schedule is missing for the given time. """
     pass
 
+    def __str__(self):
+        return f"MissingScheduleError"
+
 
 class MissingProfileError(Exception):
     """ Raised when a profile is missing for the given time. """
     pass
+
+    def __str__(self):
+        return f"MissingProfileError"
 
 
 @dataclass
