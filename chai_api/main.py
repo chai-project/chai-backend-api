@@ -198,13 +198,14 @@ def cli(config, host, port, bearer_file, dbserver, db, username, dbpass_file, de
 # MARK: error handling functions
 
 
-def custom_response_handler(_req, resp, _ex, _params):
+def custom_response_handler(_req, resp, exception, _params):
     """
     Handle unhandled and/or unexpected exceptions here.
     This simply overrides and mimics the default mechanism in falcon to return a HTTP Error of 500.
     The key difference is that it provides a hook for custom messaging, e.g. using Pushover.
     """
-    send_message(f"The CHAI API server encountered an unhandled exception: {_ex}.")
+    print(exception)
+    send_message(f"The CHAI API server encountered an unhandled exception: {exception}.")
     resp.status = falcon.HTTP_500
     resp.content_type = falcon.MEDIA_JSON
     resp.content = {}
