@@ -103,7 +103,9 @@ def get_heating_status(home_id: int, db_session: Session) -> HeatingStatus:
 
     # calculate the 15 min interval for the current time as well as the daymask for the day
     slot = now.hour * 4 + now.minute // 15
-    daymask = 2 ** (now.day_of_week - 1)
+    day_of_week = now.day_of_week
+    day_of_week = day_of_week if day_of_week != 0 else 7
+    daymask = 2 ** (day_of_week - 1)
 
     # get the cost for the current half hour slot
     values: [ElectricityPrice] = get_energy_values(now, now, limit=1)  # get the current electricity price
