@@ -81,12 +81,12 @@ def main(config: DBConfiguration, refresh_token: str, home_label: str, bearer: s
 @click.option("--config", default=None, help="The TOML configuration file.")
 @click.option("--refreshtoken", help="The Netatmo device access refresh token.")
 @click.option("--label", help="The label associated with the home.")
-def cli(config, refresh_token, label):  # pylint: disable=invalid-name
+def cli(config, refreshtoken, label):  # pylint: disable=invalid-name
     if config and not os.path.isfile(config):
         click.echo("The configuration file is not found. Please provide a valid file path.")
         sys.exit(0)
 
-    if not refresh_token:
+    if not refreshtoken:
         click.echo("The Netatmo refresh token should be provided and should not be empty.")
         sys.exit(0)
 
@@ -107,7 +107,7 @@ def cli(config, refresh_token, label):  # pylint: disable=invalid-name
 
                     main(
                         DBConfiguration(db_server, db_username, db_password, db_name, db_debug),
-                        refresh_token, label, str(toml["server"]["bearer"])
+                        refreshtoken, label, str(toml["server"]["bearer"])
                     )
             except tomli.TOMLDecodeError:
                 click.echo("The configuration file is not valid and cannot be parsed.")
