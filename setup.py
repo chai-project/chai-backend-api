@@ -25,6 +25,7 @@ setup(
                       "falcon_sqla",  # SQL session middleware for falcon
                       "tomli",  # TOML configuration file parser
                       "pushover_complete",  # simple instant notifications service
+                      "requests",  # handle API requests
                       # "chai-data-sources",  # Netatmo data sources for CHAI
                       ],
     extras_require={
