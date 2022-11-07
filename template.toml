@@ -1,4 +1,5 @@
 # Provide the settings for the backend API.
+# The configuration file for creating a new user follows the same structure, although many tags are ignored.
 
 # Debug options can be enabled for the server, for the DB, or both.
 # When all debug options are present the generic one is applied first, and then overwritten by section-based options.
