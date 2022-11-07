@@ -69,7 +69,7 @@ def main(config: DBConfiguration, refresh_token: str, home_label: str, bearer: s
             session.commit()
             for i in range(5):
                 requests.get(
-                    "https://api.project-chai.org/profile/reset/",
+                    "http://localhost:8080/profile/reset/",
                     params={"label": home_label, "profile": i + 1},
                     headers={"Authorization": f"Bearer {bearer},{auth_token}"}
                 )
