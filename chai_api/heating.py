@@ -470,8 +470,4 @@ def main(*, db_server: str, db_name: str, db_username: str, db_password: str,
 
 
 if __name__ == "__main__":
-    # cli()
-    # testing code
-    cli.callback(
-        "/Users/kimbauters/Library/Mobile Documents/com~apple~CloudDocs/CHAI/Programming/Python/CHAI_api/settings.toml"
-    )
+    cli()
