@@ -1,6 +1,7 @@
 # pylint: disable=line-too-long, too-many-lines, missing-module-docstring
 
 import math
+import shelve
 import unittest
 from dataclasses import dataclass
 from typing import Union, List, Optional
@@ -20,6 +21,19 @@ class ElectricityPrice:  # pylint: disable=missing-class-docstring, missing-func
             "end": self.to_date.isoformat(),
             "rate": self.price,
         }
+
+
+@dataclass
+class PriceAttack:
+    modifier: float
+    start_date: pendulum.DateTime
+    end_date: pendulum.DateTime
+
+    def is_affected(self, date: pendulum.DateTime):
+        return self.start_date <= date < self.end_date
+
+    def get_modifier(self, date: pendulum.DateTime):
+        return self.modifier if self.is_affected(date) else 1
 
 
 data_2019 = {
@@ -1318,12 +1332,14 @@ def _get_values(start_date: pendulum.DateTime, end_date: pendulum.DateTime,
     return [data_2019[fetch] for fetch in to_fetch]
 
 
-def get_energy_values(start_date: pendulum.DateTime, end_date: pendulum.DateTime, limit: Optional[int] = None):
+def get_energy_values(start_date: pendulum.DateTime, end_date: pendulum.DateTime,
+                      limit: Optional[int] = None, shelve_db: Optional[str] = None) -> List[float]:
     """
     Find and return the data corresponding with the given start (inclusive) and end date (exclusive).
     :param start_date: The start date of the range.
     :param end_date: The end date of the range.
     :param limit: The maximum number of values to return starting from the oldest.
+    :param shelve_db: The path to a shelve database to use for price attack information.
     :return: A list of mock electricity values taken from the 2019 dataset
     """
 
@@ -1378,9 +1394,19 @@ def get_energy_values(start_date: pendulum.DateTime, end_date: pendulum.DateTime
         result = result[:limit]
 
     response = []
+    attack: Optional[PriceAttack] = None
+
+    if shelve_db is not None:
+        with shelve.open(shelve_db) as db:
+            try:
+                attack = db["attack"]  # noqa
+            except KeyError as _err:
+                pass
+
     while report_date < end_date and len(result) > 0:
+        modifier = 1 if attack is None else attack.get_modifier(report_date)
         next_date = report_date.add(minutes=30)
-        response.append(ElectricityPrice(from_date=report_date, to_date=next_date, price=result.pop(0)))
+        response.append(ElectricityPrice(from_date=report_date, to_date=next_date, price=result.pop(0) * modifier))
         report_date = next_date
 
     return response

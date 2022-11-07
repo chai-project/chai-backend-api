@@ -3,6 +3,7 @@
 # # pylint: disable=missing-class-docstring, missing-function-docstring
 
 import os
+import shelve
 import sys
 from dataclasses import dataclass
 from typing import Optional
@@ -58,11 +59,12 @@ class HeatingStatus:
     expires_at: Optional[pendulum.DateTime]
 
 
-def get_heating_status(home_id: int, db_session: Session) -> HeatingStatus:
+def _get_heating_status(home_id: int, db_session: Session, shelve_db: str) -> HeatingStatus:
     """
     Get the current heating status for the given home.
     :param home_id: The ID of the home to get the status for.
     :param db_session: The database session to use when accessing DB information.
+    :param shelve_db: The path to the shelve database to use for pricing attacks.
     :return: The current heating status. The mode will be one out of the 4 available options. For each mode the
              target temperature to send to Netatmo devices is returned. The expires_at field is only set when the
              current heating status is not controlled by the AI (i.e. pure AUTO mode that isn't OVERRIDE).
@@ -108,7 +110,7 @@ def get_heating_status(home_id: int, db_session: Session) -> HeatingStatus:
     daymask = 2 ** (day_of_week - 1)
 
     # get the cost for the current half hour slot
-    values: [ElectricityPrice] = get_energy_values(now, now, limit=1)  # get the current electricity price
+    values: [ElectricityPrice] = get_energy_values(now, now, limit=1, shelve_db=shelve_db)  # get current elec price
     if len(values) != 1:  # if there is no current price, return an error
         raise MissingPriceError
     price = values[0]
@@ -196,10 +198,12 @@ def set_netatmo_heating(device: NetatmoDevice, temperature: float, mode: Heating
 class HeatingResource:
     client_id: str = ""
     client_secret: str = ""
+    shelve_db: str = ""
 
-    def __init__(self, client_id, client_secret):
+    def __init__(self, client_id, client_secret, shelve_location):
         self.client_id = client_id
         self.client_secret = client_secret
+        self.shelve_db = shelve_location
 
     def on_get(self, req: Request, resp: Response):  # noqa
         try:
@@ -248,7 +252,7 @@ class HeatingResource:
                 return
 
             try:
-                heating_status = get_heating_status(home.id, db_session)
+                heating_status = _get_heating_status(home.id, db_session, shelve_db=self.shelve_db)
                 resp.content_type = falcon.MEDIA_JSON
                 resp.status = falcon.HTTP_OK
 
@@ -323,14 +327,14 @@ class HeatingResource:
                 expires_at=expires_at,
                 duration=duration,
                 mode=request.mode.get_id(),
-                price=get_energy_values(changed_at, changed_at, limit=1)[0].price,
+                price=get_energy_values(changed_at, changed_at, limit=1, shelve_db=self.shelve_db)[0].price,
                 temperature=request.target if request.mode == HeatingModeOption.AUTO else None
             )
 
             db_session.add(setpoint_change)
             db_session.commit()
 
-            heating_status = get_heating_status(home.id, db_session)
+            heating_status = _get_heating_status(home.id, db_session, shelve_db=self.shelve_db)
             set_netatmo_heating(
                 home.relay, heating_status.temperature, heating_status.mode,
                 self.client_id, self.client_secret
@@ -406,6 +410,11 @@ def cli(config):  # pylint: disable=invalid-name
             try:
                 toml = tomli.load(file)
 
+                shelve_location = toml["server"]["shelve"]
+                with shelve.open(shelve_location) as db:
+                    db["test"] = "test"
+                    del db["test"]
+
                 if toml_db := toml["database"]:
                     db_server = str(toml_db["server"])
                     db_name = str(toml_db["dbname"])
@@ -421,7 +430,8 @@ def cli(config):  # pylint: disable=invalid-name
                 main(
                     db_server=db_server, db_name=db_name, db_username=db_username, db_password=db_password,
                     pushover_app=pushover_app, pushover_user=pushover_user,
-                    client_id=netatmo_id, client_secret=netatmo_secret
+                    client_id=netatmo_id, client_secret=netatmo_secret,
+                    shelve_db=shelve_location
                 )
 
             except tomli.TOMLDecodeError:
@@ -433,10 +443,13 @@ def cli(config):  # pylint: disable=invalid-name
             except AssertionError:
                 click.echo("Make sure the prediction_banded list for each profile has 36 entries, each of 3 elements.")
                 sys.exit(0)
+            except Exception as err:
+                click.echo(f"Unable to open and write to the shelve file: {err}")
+                sys.exit(0)
 
 
 def main(*, db_server: str, db_name: str, db_username: str, db_password: str,
-         pushover_app: str, pushover_user: str, client_id: str, client_secret: str):
+         pushover_app: str, pushover_user: str, client_id: str, client_secret: str, shelve_db: str):
 
     pushover = Pushover(pushover_app)
 
@@ -460,7 +473,7 @@ def main(*, db_server: str, db_name: str, db_username: str, db_password: str,
 
             for home in homes:
                 # calculate the desired temperature point
-                status = get_heating_status(home.id, session)
+                status = _get_heating_status(home.id, session, shelve_db=shelve_db)
                 # make the Netatmo call to change the temperature
                 try:
                     set_netatmo_heating(home.relay, status.temperature, status.mode, client_id, client_secret)

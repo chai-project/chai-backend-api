@@ -14,6 +14,11 @@ from chai_api.energy_loop import get_energy_values, ElectricityPrice
 
 
 class PriceResource:
+    shelve_db: str = ""
+
+    def __init__(self, shelve_location):
+        self.shelve_db = shelve_location
+
     def on_get(self, req: Request, resp: Response):  # noqa
         try:
             options = req.params
@@ -42,7 +47,7 @@ class PriceResource:
                 else:
                     request.end = request.start.add(days=math.ceil(request.limit / 46))
 
-            entries: [ElectricityPrice] = get_energy_values(request.start, request.end, request.limit)
+            entries: [ElectricityPrice] = get_energy_values(request.start, request.end, request.limit, self.shelve_db)
 
             resp.content_type = falcon.MEDIA_JSON
             resp.status = falcon.HTTP_OK

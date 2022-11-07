@@ -102,3 +102,13 @@ class XAIGet:
     def __post_init__(self):
         if self.skip is None or self.skip < 0:
             self.skip = 0
+
+
+@dataclass
+class AttackPut:
+    modifier: float
+    duration: Optional[int]  # in minutes, must be multiple of 30
+
+    def __post_init__(self):
+        if self.duration is None:
+            self.duration = 60

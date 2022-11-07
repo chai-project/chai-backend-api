@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import json
 import os
+import shelve
 import sys
 from typing import Optional, List
 
@@ -26,6 +27,7 @@ except (ImportError, ModuleNotFoundError):
     def run_server(app: App, host: str, port: int):  # pylint: disable=missing-function-docstring
         HTTPServer((host, port), app).start()
 
+from chai_api.attack import AttackResource
 from chai_api.db_definitions import db_engine, Configuration as DBConfiguration
 from chai_api.heating import HeatingResource, ValveResource
 from chai_api.history import HistoryResource
@@ -51,6 +53,7 @@ class Configuration:  # pylint: disable=too-few-public-methods, too-many-instanc
     host: str = "0.0.0.0"
     port: int = 8080
     bearer: Optional[str] = None  # when None this value should be ignored, a.k.a. open access
+    shelve: str = ""
     db_server: str = "127.0.0.1"
     db_name: str = "chai"
     db_username: str = ""
@@ -107,6 +110,16 @@ def cli(config, host, port, bearer_file, dbserver, db, username, dbpass_file, de
                     settings.host = str(toml_server.get("host", settings.host))
                     settings.port = int(toml_server.get("port", settings.port))
                     settings.bearer = toml_server.get("bearer", settings.bearer)
+                    settings.shelve = toml_server["shelve"]
+
+                    try:
+                        with shelve.open(settings.shelve) as db:
+                            db["test"] = "test"
+                            del db["test"]
+                    except Exception as err:
+                        click.echo(f"Unable to open and write to the shelve file: {err}")
+                        sys.exit(0)
+
                     settings.api_debug = bool(toml_server.get("debug", settings.api_debug))
                 if toml_db := toml["database"]:
                     settings.db_server = str(toml_db.get("server", settings.db_server))
@@ -274,17 +287,18 @@ def main(settings: Configuration):
     app = falcon.App(middleware=[auth_middleware, session_middleware] if bearer is not None else [session_middleware])
 
     # create routes to resource instances
-    app.add_route("/heating/mode/", HeatingResource(settings.netatmo_id, settings.netatmo_secret))
+    app.add_route("/heating/mode/", HeatingResource(settings.netatmo_id, settings.netatmo_secret, settings.shelve))
     app.add_route("/heating/valve/", ValveResource())
     app.add_route("/heating/profile/", ProfileResource())
     app.add_route("/heating/historic/", HistoryResource())
-    app.add_route("/electricity/prices/", PriceResource())
+    app.add_route("/electricity/prices/", PriceResource(settings.shelve))
     app.add_route("/xai/region/", XAIRegionResource(settings.profiles))
     app.add_route("/xai/band/", XAIBandResource(settings.profiles))
     app.add_route("/xai/scatter/", XAIScatterResource(settings.profiles))
     app.add_route("/logs/", LogsResource())
     app.add_route("/schedule/", ScheduleResource())
     app.add_route("/profile/reset/", ProfileResetResource(settings.profiles))
+    app.add_route("/attack/", AttackResource(settings.shelve))
 
     app.add_error_handler(Exception, custom_response_handler)  # handle unhandled/unexpected exceptions
     app.add_sink(Sink().on_get)  # route all unknown traffic to the sink

@@ -10,6 +10,7 @@ debug  = false
 host   = "0.0.0.0"
 port   = 8080
 bearer = "bearer_token_here"
+shelve = "/location/to/shelve/db"  # no need to include the .db extension
 debug  = false
 
 [database]

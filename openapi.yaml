@@ -24,6 +24,8 @@ tags:
   description: "Get eXplainable AI information on a given profile."
 - name: "reset"
   description: "Reset profiles back to their default."
+- name: "attack"
+  description: "Perform a price attack."
 
 paths:
   /heating/mode:
@@ -599,6 +601,39 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Schedule'
+
+
+  /attack:
+    put:
+      tags:
+        - attack
+      responses:
+        '200':
+          description: "OK"
+        '400':
+          description: "The provided duration is not a multiple of 30, the duration is not a strictly positive integer, or the modifier is not a float."
+        '401':
+          description: "The bearer token is not provided or is invalid."
+        '500':
+          description: "The server experience an internal error."
+      summary: "Launch a price attack with the given modifier."
+      description: ""
+      operationId: "putAttack"
+      parameters:
+        - name: modifier
+          in: query
+          description: "The modifier to apply to all price information."
+          required: true
+          schema:
+            type: number
+            example: 1.5
+        - name: duration
+          in: query
+          description: "The duration in minutes of the attack. Defaults to 60. Must be positive and a multiple of 30 if specified."
+          required: true
+          schema:
+            type: integer
+            example: 60
 
 
 components:
