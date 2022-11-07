@@ -211,10 +211,7 @@ def custom_response_handler(_req, resp, exception, _params):
     The key difference is that it provides a hook for custom messaging, e.g. using Pushover.
     """
     print(exception)
-    exc_type, exc_obj, exc_tb = sys.exc_info()
-    fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-    print(exc_type, fname, exc_tb.tb_lineno)
-    send_message(f"The CHAI API server encountered an unhandled exception: {exception} in {fname} on line #{exc_tb.tb_lineno}.")
+    send_message(f"The CHAI API server encountered an unhandled exception: {exception}.")
     resp.status = falcon.HTTP_500
     resp.content_type = falcon.MEDIA_JSON
     resp.content = {}
