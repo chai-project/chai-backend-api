@@ -411,9 +411,9 @@ def cli(config):  # pylint: disable=invalid-name
                 toml = tomli.load(file)
 
                 shelve_location = toml["server"]["shelve"]
-                with shelve.open(shelve_location) as db:
-                    db["test"] = "test"
-                    del db["test"]
+                with shelve.open(shelve_location) as shelve_db:
+                    shelve_db["test"] = "test"
+                    del shelve_db["test"]
 
                 if toml_db := toml["database"]:
                     db_server = str(toml_db["server"])

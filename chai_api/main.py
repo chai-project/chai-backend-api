@@ -113,9 +113,9 @@ def cli(config, host, port, bearer_file, dbserver, db, username, dbpass_file, de
                     settings.shelve = toml_server["shelve"]
 
                     try:
-                        with shelve.open(settings.shelve) as db:
-                            db["test"] = "test"
-                            del db["test"]
+                        with shelve.open(settings.shelve) as shelve_db:
+                            shelve_db["test"] = "test"
+                            del shelve_db["test"]
                     except Exception as err:
                         click.echo(f"Unable to open and write to the shelve file: {err}")
                         sys.exit(0)
