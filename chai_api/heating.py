@@ -345,7 +345,7 @@ class HeatingResource:
                         home_id=home.id, timestamp=pendulum.now(), category="SETPOINT_MODE",
                         parameters=[
                             request.mode.value if not request.target else HeatingModeOption.OVERRIDE.value,
-                            request.target if request.mode == HeatingModeOption.OVERRIDE else None
+                            request.target if request.mode == HeatingModeOption.AUTO else None
                         ]
                     )
                 )
