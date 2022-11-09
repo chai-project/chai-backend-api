@@ -156,7 +156,7 @@ class Profile(Base):
     confidence_region = Column(JSON)
     prediction_banded = Column(JSON)
     home: Home = relationship("Home")
-    setpointChange: SetpointChange = relationship("SetpointChange")
+    setpointChange: SetpointChange = relationship("SetpointChange", lazy="selectin")
 
     def calculate_temperature(self, price: float):
         """
