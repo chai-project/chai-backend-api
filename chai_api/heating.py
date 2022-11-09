@@ -344,7 +344,7 @@ class HeatingResource:
                     Log(
                         home_id=home.id, timestamp=pendulum.now(), category="SETPOINT_MODE",
                         parameters=[
-                            HeatingModeOption.value,
+                            request.mode.value,
                             request.target if request.mode == HeatingModeOption.AUTO else None
                         ]
                     )
