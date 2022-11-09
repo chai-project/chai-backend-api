@@ -23,6 +23,7 @@ from sqlalchemy.sql.expression import func
 
 from chai_api.db_definitions import NetatmoReading, NetatmoDevice, get_home, SetpointChange, Schedule, Profile, Home
 from chai_api.db_definitions import db_engine_manager, db_session_manager, Configuration as DBConfiguration
+from chai_api.db_definitions import Log
 from chai_api.energy_loop import get_energy_values, ElectricityPrice
 from chai_api.expected import HeatingGet, HeatingPut
 from chai_api.responses import HeatingMode, HeatingModeOption, ValveStatus
@@ -57,6 +58,7 @@ class HeatingStatus:
     mode: HeatingModeOption
     temperature: float
     expires_at: Optional[pendulum.DateTime]
+    log: Optional[Log] = None
 
 
 def _get_heating_status(home_id: int, db_session: Session, shelve_db: str) -> HeatingStatus:
@@ -162,11 +164,19 @@ def _get_heating_status(home_id: int, db_session: Session, shelve_db: str) -> He
     # calculate the temperature and return the result
     temperature = profile.calculate_temperature(price.price)
 
-    return HeatingStatus(HeatingModeOption.AUTO, temperature, None)
+    return HeatingStatus(HeatingModeOption.AUTO, temperature, None,
+                         Log(home_id=home_id, timestamp=pendulum.now(), category="VALVE_SET",
+                             parameters=[
+                                 profile.profile_id,
+                                 price,
+                                 temperature,
+                                 profile.mean2,
+                                 profile.mean1
+                             ]))
 
 
-def _set_netatmo_heating(device: NetatmoDevice, temperature: float, mode: HeatingModeOption,
-                         client_id: str, client_secret: str) -> bool:
+def _set_netatmo_heating(target_status: HeatingStatus, db_session: Session,
+                         device: NetatmoDevice, client_id: str, client_secret: str) -> bool:
     """
     Set the Netatmo device to the desired temperature
     :param device: The Netatmo device to manipulate.
@@ -182,11 +192,12 @@ def _set_netatmo_heating(device: NetatmoDevice, temperature: float, mode: Heatin
         client_secret=client_secret,
         refresh_token=device.refreshToken
     )
+    temperature = target_status.temperature
     valve_mode = SetpointMode.MANUAL
-    if mode == HeatingModeOption.OFF:
+    if target_status.mode == HeatingModeOption.OFF:
         valve_mode = SetpointMode.OFF
         temperature = None
-    if mode == HeatingModeOption.ON:
+    if target_status.mode == HeatingModeOption.ON:
         valve_mode = SetpointMode.MANUAL
         temperature = 30
 
@@ -194,6 +205,9 @@ def _set_netatmo_heating(device: NetatmoDevice, temperature: float, mode: Heatin
         temperature = temperature
 
     print(f"setting {device.refreshToken} to {temperature}°C in mode {valve_mode}")
+    if target_status.log is not None:
+        db_session.add(target_status.log)
+        db_session.commit()
     return client.set_device(device=DeviceType.VALVE, mode=valve_mode, temperature=temperature, minutes=60)
 
 
@@ -325,6 +339,17 @@ class HeatingResource:
             duration = 60 if not request.timeout else request.timeout
             expires_at = changed_at.add(minutes=duration)
 
+            if request.hidden is not None:
+                db_session.add(
+                    Log(
+                        home_id=home.id, timestamp=pendulum.now(), category="SETPOINT_MODE",
+                        parameters=[
+                            HeatingModeOption.value,
+                            request.target if request.mode == HeatingModeOption.AUTO else None
+                        ]
+                    )
+                )
+
             # noinspection PyTypeChecker
             setpoint_change = SetpointChange(
                 home=home,
@@ -344,10 +369,7 @@ class HeatingResource:
             # when the request is not hidden it is processed and its new status is immediately applied
             if not request.hidden:
                 heating_status = _get_heating_status(home.id, db_session, shelve_db=self.shelve_db)
-                _set_netatmo_heating(
-                    home.relay, heating_status.temperature, heating_status.mode,
-                    self.client_id, self.client_secret
-                )
+                _set_netatmo_heating(heating_status, db_session, home.relay, self.client_id, self.client_secret)
 
             resp.content_type = falcon.MEDIA_JSON
             resp.status = falcon.HTTP_OK
@@ -485,7 +507,7 @@ def main(*, db_server: str, db_name: str, db_username: str, db_password: str,
                 status = _get_heating_status(home.id, session, shelve_db=shelve_db)
                 # make the Netatmo call to change the temperature
                 try:
-                    _set_netatmo_heating(home.relay, status.temperature, status.mode, client_id, client_secret)
+                    _set_netatmo_heating(status, session, home.relay, client_id, client_secret)
                     print(f"set the Netatmo valve for the property with the label {home.label}")
                 except Exception as _err:  # noqa
                     send_message(f"Failed to set the Netatmo valve for the property with label {home.label}.")

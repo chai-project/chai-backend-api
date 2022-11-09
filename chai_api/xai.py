@@ -9,7 +9,7 @@ import ujson as json
 from dacite import from_dict, DaciteError, Config
 from falcon import Request, Response
 
-from chai_api.db_definitions import Profile, get_home, SetpointChange
+from chai_api.db_definitions import Log, Profile, SetpointChange, get_home
 from chai_api.expected import XAIGet
 from chai_api.responses import XAIRegion, XAIBand, XAIScatter, XAIScatterEntry
 
@@ -247,6 +247,7 @@ class ProfileResetResource:
                 correlation1=default_profile.correlation1, correlation2=default_profile.correlation2
             )
             db_session.add(new_profile)
+            db_session.add(Log(home_id=home.id, category="PROFILE_RESET", parameters=[parameters.profile]))
             db_session.commit()
         except DaciteError as err:
             resp.content_type = falcon.MEDIA_TEXT
