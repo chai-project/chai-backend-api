@@ -168,7 +168,7 @@ def _get_heating_status(home_id: int, db_session: Session, shelve_db: str) -> He
                          Log(home_id=home_id, timestamp=pendulum.now(), category="VALVE_SET",
                              parameters=[
                                  profile.profile_id,
-                                 price,
+                                 price.price,
                                  temperature,
                                  profile.mean2,
                                  profile.mean1
