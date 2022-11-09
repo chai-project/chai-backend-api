@@ -165,8 +165,8 @@ def _get_heating_status(home_id: int, db_session: Session, shelve_db: str) -> He
     return HeatingStatus(HeatingModeOption.AUTO, temperature, None)
 
 
-def set_netatmo_heating(device: NetatmoDevice, temperature: float, mode: HeatingModeOption,
-                        client_id: str, client_secret: str) -> bool:
+def _set_netatmo_heating(device: NetatmoDevice, temperature: float, mode: HeatingModeOption,
+                         client_id: str, client_secret: str) -> bool:
     """
     Set the Netatmo device to the desired temperature
     :param device: The Netatmo device to manipulate.
@@ -344,7 +344,7 @@ class HeatingResource:
             # when the request is not hidden it is processed and its new status is immediately applied
             if not request.hidden:
                 heating_status = _get_heating_status(home.id, db_session, shelve_db=self.shelve_db)
-                set_netatmo_heating(
+                _set_netatmo_heating(
                     home.relay, heating_status.temperature, heating_status.mode,
                     self.client_id, self.client_secret
                 )
@@ -485,7 +485,7 @@ def main(*, db_server: str, db_name: str, db_username: str, db_password: str,
                 status = _get_heating_status(home.id, session, shelve_db=shelve_db)
                 # make the Netatmo call to change the temperature
                 try:
-                    set_netatmo_heating(home.relay, status.temperature, status.mode, client_id, client_secret)
+                    _set_netatmo_heating(home.relay, status.temperature, status.mode, client_id, client_secret)
                     print(f"set the Netatmo valve for the property with the label {home.label}")
                 except Exception as _err:  # noqa
                     send_message(f"Failed to set the Netatmo valve for the property with label {home.label}.")
