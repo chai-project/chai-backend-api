@@ -82,6 +82,8 @@ def _get_heating_status(home_id: int, db_session: Session, shelve_db: str) -> He
     active_setpoint = db_session.query(
         SetpointChange
     ).filter(
+        SetpointChange.hidden.is_(False)
+    ).filter(
         SetpointChange.home_id == home_id
     ).filter(
         SetpointChange.expires_at > func.current_timestamp()
@@ -306,6 +308,10 @@ class HeatingResource:
                     resp.status = falcon.HTTP_BAD_REQUEST
                     return
 
+            # a hidden mode change remains invisible and has a timeout of 0
+            if request.hidden:
+                request.timeout = 0
+
             # all is looking good, we can link this to the home
             home = get_home(request.label, db_session, req.context.get("user", "anonymous"))
 
@@ -328,17 +334,20 @@ class HeatingResource:
                 duration=duration,
                 mode=request.mode.get_id(),
                 price=get_energy_values(changed_at, changed_at, limit=1, shelve_db=self.shelve_db)[0].price,
-                temperature=request.target if request.mode == HeatingModeOption.AUTO else None
+                temperature=request.target if request.mode == HeatingModeOption.AUTO else None,
+                hidden=request.hidden
             )
 
             db_session.add(setpoint_change)
             db_session.commit()
 
-            heating_status = _get_heating_status(home.id, db_session, shelve_db=self.shelve_db)
-            set_netatmo_heating(
-                home.relay, heating_status.temperature, heating_status.mode,
-                self.client_id, self.client_secret
-            )
+            # when the request is not hidden it is processed and its new status is immediately applied
+            if not request.hidden:
+                heating_status = _get_heating_status(home.id, db_session, shelve_db=self.shelve_db)
+                set_netatmo_heating(
+                    home.relay, heating_status.temperature, heating_status.mode,
+                    self.client_id, self.client_secret
+                )
 
             resp.content_type = falcon.MEDIA_JSON
             resp.status = falcon.HTTP_OK

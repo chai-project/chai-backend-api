@@ -5,7 +5,7 @@ from contextlib import contextmanager
 from dataclasses import dataclass
 from typing import Optional
 
-from sqlalchemy import Column, String, Integer, Float, DateTime, ForeignKey, TIMESTAMP, Index, JSON
+from sqlalchemy import Column, Boolean, String, Integer, Float, DateTime, ForeignKey, TIMESTAMP, Index, JSON
 from sqlalchemy import and_
 from sqlalchemy import create_engine
 from sqlalchemy.engine import Engine
@@ -117,6 +117,7 @@ class SetpointChange(Base):
     mode = Column(Integer, nullable=False)
     temperature = Column(Float)
     price = Column(Float)
+    hidden = Column(Boolean, nullable=False)
     home: Home = relationship("Home")
 
 

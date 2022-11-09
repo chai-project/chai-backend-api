@@ -20,6 +20,11 @@ class HeatingPut:
     mode: HeatingModeOption
     target: Optional[float]
     timeout: Optional[int]
+    hidden: Optional[bool]
+
+    def __post_init__(self):
+        if self.hidden is None:
+            self.hidden = False
 
 
 class HistoryOption(Enum):

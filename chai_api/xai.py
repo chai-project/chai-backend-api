@@ -9,7 +9,7 @@ import ujson as json
 from dacite import from_dict, DaciteError, Config
 from falcon import Request, Response
 
-from chai_api.db_definitions import Profile, get_home
+from chai_api.db_definitions import Profile, get_home, SetpointChange
 from chai_api.expected import XAIGet
 from chai_api.responses import XAIRegion, XAIBand, XAIScatter, XAIScatterEntry
 
@@ -68,6 +68,8 @@ class XAIProfileResource:
 
             query = db_session.query(
                 Profile
+            ).filter(
+                Profile.setpointChange.has(SetpointChange.hidden.is_(False))
             ).filter(
                 Profile.id >= subquery.as_scalar()
             ).filter(
