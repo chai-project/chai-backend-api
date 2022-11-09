@@ -165,7 +165,7 @@ class Profile(Base):
         :param price: The price used to calculate the temperature.
         :return: The temperature based on the model.
         """
-        return price * self.mean2 + self.mean1
+        return round(max(7.0, min(30.0, price * self.mean2 + self.mean1)) * 2) / 2
 
 
 def get_home(label: str, session: Session, token: str) -> Optional[Home]:
