@@ -38,7 +38,11 @@ class LogsResource:
             )
 
             if request.category is not None:
-                query = query.filter(Log.category == request.category)
+                if "," in request.category:
+                    categories = [category.strip() for category in request.category.split(",")]
+                    query = query.filter(Log.category.in_(categories))
+                else:
+                    query = query.filter(Log.category == request.category)
 
             if request.end is not None:
                 query = query.filter(Log.timestamp < request.end)
