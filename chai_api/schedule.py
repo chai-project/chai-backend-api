@@ -13,7 +13,7 @@ from falcon import Request, Response
 from sqlalchemy import and_
 from sqlalchemy.orm import aliased
 
-from chai_api.db_definitions import get_home, Schedule
+from chai_api.db_definitions import get_home, Schedule, Log
 from chai_api.expected import ScheduleGet
 from chai_api.responses import ScheduleEntry
 
@@ -216,6 +216,13 @@ class ScheduleResource:
                 # noinspection PyTypeChecker
                 # ignore the warnings; DateTime is a datetime.datetime (compatible) instance
                 db_session.add(Schedule(home=home, revision=revision, day=2 ** (index - 1), schedule=schedule_dict))
+
+            db_session.add(Log(
+                home_id=home.id,
+                timestamp=pendulum.now(),
+                category="SCHEDULE_EDIT",
+                parameters=[]
+            ))
             db_session.commit()
         except (DaciteError, ValueError) as err:
             resp.content_type = falcon.MEDIA_TEXT
