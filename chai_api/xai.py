@@ -5,6 +5,7 @@
 from typing import List, Optional
 
 import falcon
+import pendulum
 import ujson as json
 from dacite import from_dict, DaciteError, Config
 from falcon import Request, Response
@@ -247,7 +248,12 @@ class ProfileResetResource:
                 correlation1=default_profile.correlation1, correlation2=default_profile.correlation2
             )
             db_session.add(new_profile)
-            db_session.add(Log(home_id=home.id, category="PROFILE_RESET", parameters=[parameters.profile]))
+            db_session.add(Log(
+                home_id=home.id,
+                timestamp=pendulum.now(),
+                category="PROFILE_RESET",
+                parameters=[parameters.profile]
+            ))
             db_session.commit()
         except DaciteError as err:
             resp.content_type = falcon.MEDIA_TEXT
