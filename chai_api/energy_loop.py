@@ -1333,7 +1333,7 @@ def _get_values(start_date: pendulum.DateTime, end_date: pendulum.DateTime,
 
 
 def get_energy_values(start_date: pendulum.DateTime, end_date: pendulum.DateTime,
-                      limit: Optional[int] = None, shelve_db: Optional[str] = None) -> List[float]:
+                      limit: Optional[int] = None, shelve_db: Optional[str] = None) -> List[ElectricityPrice]:
     """
     Find and return the data corresponding with the given start (inclusive) and end date (exclusive).
     :param start_date: The start date of the range.
