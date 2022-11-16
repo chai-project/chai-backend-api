@@ -37,10 +37,6 @@ class LogsResource:
                 Log.timestamp >= request.start
             ).order_by(
                 Log.timestamp.desc()
-            ).offset(
-                request.skip
-            ).limit(
-                request.limit
             )
 
             if request.category is not None:
@@ -52,6 +48,9 @@ class LogsResource:
 
             if request.end is not None:
                 query = query.filter(Log.timestamp < request.end)
+
+            query = query.offset(request.skip)
+            query = query.limit(request.skip)
 
             result: [Log] = query.all()
 
