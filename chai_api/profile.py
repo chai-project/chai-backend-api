@@ -29,9 +29,9 @@ class ProfileResource:
                 resp.status = falcon.HTTP_BAD_REQUEST
                 return
 
-            if request.profile is not None and (request.profile < 0 or request.profile > 5):
+            if request.profile is not None and (request.profile < 1 or request.profile > 5):
                 resp.content_type = falcon.MEDIA_TEXT
-                resp.text = "a profile ID is expected to be between 0 and 5"
+                resp.text = "a profile ID is expected to be between 1 and 5"
                 resp.status = falcon.HTTP_BAD_REQUEST
                 return
 
