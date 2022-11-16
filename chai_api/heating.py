@@ -175,7 +175,7 @@ def _get_heating_status(home_id: int, db_session: Session, shelve_db: str) -> He
                              ]))
 
 
-def _set_netatmo_heating(target_status: HeatingStatus, db_session: Session,
+def _set_netatmo_heating(label: str, target_status: HeatingStatus, db_session: Session,
                          device: NetatmoDevice, client_id: str, client_secret: str) -> bool:
     """
     Set the Netatmo device to the desired temperature
@@ -204,7 +204,7 @@ def _set_netatmo_heating(target_status: HeatingStatus, db_session: Session,
     if temperature is not None:
         temperature = temperature
 
-    print(f"setting {device.refreshToken} to {temperature}°C in mode {valve_mode}")
+    print(f"setting '{label}' to {temperature}°C in mode {valve_mode}")
     if target_status.log is not None:
         db_session.add(target_status.log)
         db_session.commit()
@@ -369,7 +369,8 @@ class HeatingResource:
             # when the request is not hidden it is processed and its new status is immediately applied
             if not request.hidden:
                 heating_status = _get_heating_status(home.id, db_session, shelve_db=self.shelve_db)
-                _set_netatmo_heating(heating_status, db_session, home.relay, self.client_id, self.client_secret)
+                _set_netatmo_heating(
+                    home.label, heating_status, db_session, home.relay, self.client_id, self.client_secret)
 
             resp.content_type = falcon.MEDIA_JSON
             resp.status = falcon.HTTP_OK
@@ -422,7 +423,8 @@ class ValveResource:
 
 @click.command()
 @click.option("--config", default=None, help="The TOML configuration file.")
-def cli(config):  # pylint: disable=invalid-name
+@click.option("--notify", default=False, help="Send out Pushover notifications when the devices are unreachable.")
+def cli(config, notify):  # pylint: disable=invalid-name
     db_server = ""
     db_name = ""
     db_username = ""
@@ -462,7 +464,7 @@ def cli(config):  # pylint: disable=invalid-name
                     db_server=db_server, db_name=db_name, db_username=db_username, db_password=db_password,
                     pushover_app=pushover_app, pushover_user=pushover_user,
                     client_id=netatmo_id, client_secret=netatmo_secret,
-                    shelve_db=shelve_location
+                    shelve_db=shelve_location, notify=notify
                 )
 
             except tomli.TOMLDecodeError:
@@ -480,7 +482,8 @@ def cli(config):  # pylint: disable=invalid-name
 
 
 def main(*, db_server: str, db_name: str, db_username: str, db_password: str,
-         pushover_app: str, pushover_user: str, client_id: str, client_secret: str, shelve_db: str):
+         pushover_app: str, pushover_user: str, client_id: str, client_secret: str, shelve_db: str,
+         notify: bool = False):
 
     pushover = Pushover(pushover_app)
 
@@ -507,10 +510,12 @@ def main(*, db_server: str, db_name: str, db_username: str, db_password: str,
                 status = _get_heating_status(home.id, session, shelve_db=shelve_db)
                 # make the Netatmo call to change the temperature
                 try:
-                    _set_netatmo_heating(status, session, home.relay, client_id, client_secret)
+                    _set_netatmo_heating(home.label, status, session, home.relay, client_id, client_secret)
                     print(f"set the Netatmo valve for the property with the label {home.label}")
                 except Exception as _err:  # noqa
-                    send_message(f"Failed to set the Netatmo valve for the property with label {home.label}.")
+                    if not notify:
+                        continue
+                    send_message(f"Failed to set Netatmo valve for the property with label {home.label} due to {_err}.")
 
 
 if __name__ == "__main__":
