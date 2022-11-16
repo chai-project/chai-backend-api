@@ -13,7 +13,7 @@ import falcon
 import pendulum
 import tomli
 import ujson as json
-from chai_data_sources import NetatmoClient, SetpointMode, DeviceType
+from chai_data_sources import NetatmoClient, SetpointMode, DeviceType, NetatmoError
 from dacite import from_dict, DaciteError, Config
 from falcon import Request, Response
 from pushover_complete import PushoverAPI as Pushover
@@ -371,6 +371,7 @@ class HeatingResource:
                 heating_status = _get_heating_status(home.id, db_session, shelve_db=self.shelve_db)
                 _set_netatmo_heating(
                     home.label, heating_status, db_session, home.relay, self.client_id, self.client_secret)
+                print("set Netatmo heating")
 
             resp.content_type = falcon.MEDIA_JSON
             resp.status = falcon.HTTP_OK
@@ -378,6 +379,11 @@ class HeatingResource:
             resp.content_type = falcon.MEDIA_TEXT
             resp.status = falcon.HTTP_BAD_REQUEST
             resp.text = f"one or more of the parameters was not understood\n{err}"
+        except (TypeError, NetatmoError) as err:
+            resp.content_type = falcon.MEDIA_TEXT
+            resp.status = falcon.HTTP_INTERNAL_SERVER_ERROR
+            resp.text = f"unable to manipulate the desired Netatmo valve\n{err}"
+
 
 
 class ValveResource:
