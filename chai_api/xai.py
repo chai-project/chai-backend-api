@@ -102,7 +102,7 @@ class XAIRegionResource(XAIProfileResource):
             parameters: XAIGet = from_dict(XAIGet, req.params, config=Config(cast=[int]))
             (success, result) = self.get_profile(req, resp, parameters)
 
-            if success:
+            if success and result is not None:
                 response = None
                 if result and result.confidence_region and len(result.confidence_region) == 3:
                     response = XAIRegion(
@@ -143,7 +143,7 @@ class XAIBandResource(XAIProfileResource):
             parameters: XAIGet = from_dict(XAIGet, req.params, config=Config(cast=[int]))
             (success, result) = self.get_profile(req, resp, parameters)
 
-            if success:
+            if success and result is not None:
                 response = None
                 if result and result.prediction_banded and len(result.prediction_banded) == 36:
                     band: List[List[float]] = list(zip(*result.prediction_banded))  # noqa
@@ -182,14 +182,12 @@ class XAIScatterResource(XAIProfileResource):
             parameters: XAIGet = from_dict(XAIGet, req.params, config=Config(cast=[int]))
             (success, results) = self.get_profile(req, resp, parameters, all=True)
 
-            if success:
-                response = None
-                if results:
-                    entries = [
-                        XAIScatterEntry(result.setpointChange.price, result.setpointChange.temperature)
-                        for result in results if result.setpointChange and result.setpointChange.temperature is not None
-                    ]
-                    response = XAIScatter(entries, len(entries))
+            if success and results is not None:
+                entries = [
+                    XAIScatterEntry(result.setpointChange.price, result.setpointChange.temperature)
+                    for result in results if result.setpointChange and result.setpointChange.temperature is not None
+                ]
+                response = XAIScatter(entries, len(entries))
                 resp.content_type = falcon.MEDIA_JSON
                 if response:
                     resp.text = json.dumps(response.to_dict())

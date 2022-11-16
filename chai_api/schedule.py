@@ -172,6 +172,7 @@ class ScheduleResource:
             for entry in day_schedules:
                 cleaned = []
                 # ignore the warning, we changed it from [None] to [(int, int)]
+                assert entry is not None
                 # noinspection PyUnresolvedReferences
                 for (key, value) in entry.items():
                     cleaned.append((int(key), int(value)))
