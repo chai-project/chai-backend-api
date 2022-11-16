@@ -35,6 +35,8 @@ class LogsResource:
                 Log.home_id == home.id
             ).filter(
                 Log.timestamp >= request.start
+            ).order_by(
+	            Log.timestamp.desc()
             )
 
             if request.category is not None:
