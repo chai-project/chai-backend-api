@@ -432,7 +432,7 @@ def cli(config):  # pylint: disable=invalid-name
     netatmo_id = ""
     netatmo_secret = ""
 
-    if config and not os.path.isfile(config):
+    if not config or (config and not os.path.isfile(config)):
         click.echo("The configuration file is not found. Please provide a valid file path.")
         sys.exit(0)
 
