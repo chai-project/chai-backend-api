@@ -423,7 +423,7 @@ class ValveResource:
 
 @click.command()
 @click.option("--config", default=None, help="The TOML configuration file.")
-@click.option("--notify", default=False, help="Send out Pushover notifications when the devices are unreachable.")
+@click.option("--notify", default=False, is_flag=True, help="Send Pushover notifications when valves are unreachable.")
 def cli(config, notify):  # pylint: disable=invalid-name
     db_server = ""
     db_name = ""
