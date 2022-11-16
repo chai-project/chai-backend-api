@@ -514,6 +514,7 @@ def main(*, db_server: str, db_name: str, db_username: str, db_password: str,
                     print(f"set the Netatmo valve for the property with the label {home.label}")
                 except Exception as _err:  # noqa
                     if not notify:
+                        print(f"Failed to set Netatmo valve for the property with label {home.label} due to {_err}.")
                         continue
                     send_message(f"Failed to set Netatmo valve for the property with label {home.label} due to {_err}.")
 
