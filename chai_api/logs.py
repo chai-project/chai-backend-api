@@ -36,7 +36,11 @@ class LogsResource:
             ).filter(
                 Log.timestamp >= request.start
             ).order_by(
-	            Log.timestamp.desc()
+                Log.timestamp.desc()
+            ).offset(
+                request.skip
+            ).limit(
+                request.limit
             )
 
             if request.category is not None:
@@ -49,9 +53,6 @@ class LogsResource:
             if request.end is not None:
                 query = query.filter(Log.timestamp < request.end)
 
-            if request.limit is not None:
-                query = query.limit(request.limit)
-
             result: [Log] = query.all()
 
             response = [LogEntry(result.timestamp, result.category, result.parameters) for result in result]
@@ -63,7 +64,6 @@ class LogsResource:
             resp.content_type = falcon.MEDIA_TEXT
             resp.status = falcon.HTTP_BAD_REQUEST
             resp.text = f"one or more of the parameters was not understood\n{err}"
-
 
     def on_put(self, req: Request, resp: Response):  # noqa
         try:
