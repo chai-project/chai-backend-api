@@ -50,7 +50,7 @@ class LogsResource:
                 query = query.filter(Log.timestamp < request.end)
 
             query = query.offset(request.skip)
-            query = query.limit(request.skip)
+            query = query.limit(request.limit)
 
             result: [Log] = query.all()
 
