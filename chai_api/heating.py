@@ -339,7 +339,7 @@ class HeatingResource:
             duration = 60 if not request.timeout else request.timeout
             expires_at = changed_at.add(minutes=duration)
 
-            if request.hidden is not None:
+            if not request.hidden:
                 db_session.add(
                     Log(
                         home_id=home.id, timestamp=pendulum.now(), category="SETPOINT_MODE",
