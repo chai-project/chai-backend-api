@@ -51,6 +51,8 @@ def main(config: DBConfiguration, refresh_token: str, home_label: str, bearer: s
             print(f"==============================================")
             print()
 
+            weekday_schedule = '{"0":"1","26":"2","38":"3","72":"4","88":"1"}'
+            weekend_schedule = '{"0":"1","32":"2","44":"5","72":"4","88":"1"}'
             for day in [1, 2, 4, 8, 16, 32, 64]:
                 session.execute(
                     """
@@ -59,7 +61,7 @@ def main(config: DBConfiguration, refresh_token: str, home_label: str, bearer: s
                     VALUES (:homeid, :revision, :day, :schedule)
                     """, {
                         "homeid": home_id, "revision": pendulum.now().start_of("day").isoformat(),
-                        "day": day, "schedule": '{"0":"1"}'
+                        "day": day, "schedule": weekend_schedule if day in [32, 64] else weekday_schedule
                     }
                 )
 
