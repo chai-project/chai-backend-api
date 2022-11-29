@@ -336,7 +336,7 @@ class HeatingResource:
                 return
 
             changed_at = pendulum.now("Europe/London")
-            duration = 60 if not request.timeout else request.timeout
+            duration = 60 if request.timeout is None else request.timeout
             expires_at = changed_at.add(minutes=duration)
 
             if not request.hidden:
