@@ -110,7 +110,7 @@ class ProfileGet:
 @dataclass
 class XAIGet:
     label: str
-    profile: int
+    profile: Optional[int]
     skip: Optional[int]
 
     def __post_init__(self):
