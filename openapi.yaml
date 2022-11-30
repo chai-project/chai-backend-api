@@ -507,14 +507,14 @@ paths:
         - reset
       responses:
         '200':
-          description: "The desired profile has been reset."
+          description: "The desired profile or all profiles have been reset."
         '400':
           description: "The provided label is invalid, or the provided profile is invalid."
         '401':
           description: "The bearer token is not provided or is invalid."
         '500':
           description: "The server experience an internal error."
-      summary: "Reset a given profile to its default settings."
+      summary: "Reset one or all profiles to their default settings."
       description: ""
       operationId: "resetProfile"
       parameters:
@@ -527,7 +527,7 @@ paths:
         - name: profile
           in: query
           description: "The profile of the home which you want to reset."
-          required: true
+          required: false
           schema:
             type: integer
             minimum: 1
