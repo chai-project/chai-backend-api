@@ -214,18 +214,17 @@ class ProfileResetResource:
         try:
             parameters: XAIGet = from_dict(XAIGet, req.params, config=Config(cast=[int]))
 
-            if parameters.profile < 1 or parameters.profile > 5:
+            if parameters.profile is not None and (parameters.profile < 1 or parameters.profile > 5):
                 resp.content_type = falcon.MEDIA_TEXT
                 resp.text = "invalid value for profile, expected a value between 1 and 5 (inclusive)"
                 resp.status = falcon.HTTP_BAD_REQUEST
                 return
 
-            if len(self.profiles) < parameters.profile:
+            if parameters.profile is not None and len(self.profiles) < parameters.profile:
                 resp.content_type = falcon.MEDIA_TEXT
                 resp.status = falcon.HTTP_BAD_REQUEST
                 resp.text = f"the profile {parameters.profile} cannot be reset as its default values are not known"
                 return
-            default_profile = self.profiles[parameters.profile - 1]
 
             db_session = req.context.session
 
@@ -238,20 +237,25 @@ class ProfileResetResource:
                 resp.status = falcon.HTTP_BAD_REQUEST
                 return
 
-            new_profile = Profile(
-                profile_id=parameters.profile, home_id=home.id,
-                mean1=default_profile.mean1, mean2=default_profile.mean2,
-                variance1=default_profile.variance1, variance2=default_profile.variance2,
-                noiseprecision=default_profile.noiseprecision,
-                correlation1=default_profile.correlation1, correlation2=default_profile.correlation2
-            )
-            db_session.add(new_profile)
-            db_session.add(Log(
-                home_id=home.id,
-                timestamp=pendulum.now(),
-                category="PROFILE_RESET",
-                parameters=[parameters.profile]
-            ))
+            # assume that [1, 2, 3, 4, 5] is the set of profiles, which is an assumption that is already hardcoded
+            for profile_id in range(1, 6) if parameters.profile is None else [parameters.profile]:
+                default_profile = self.profiles[profile_id - 1]
+
+                new_profile = Profile(
+                    profile_id=profile_id, home_id=home.id,
+                    mean1=default_profile.mean1, mean2=default_profile.mean2,
+                    variance1=default_profile.variance1, variance2=default_profile.variance2,
+                    noiseprecision=default_profile.noiseprecision,
+                    correlation1=default_profile.correlation1, correlation2=default_profile.correlation2
+                )
+                db_session.add(new_profile)
+                db_session.add(Log(
+                    home_id=home.id,
+                    timestamp=pendulum.now(),
+                    category="PROFILE_RESET",
+                    parameters=[profile_id]
+                ))
+
             db_session.commit()
         except DaciteError as err:
             resp.content_type = falcon.MEDIA_TEXT
