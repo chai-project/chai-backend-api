@@ -108,9 +108,20 @@ class ProfileGet:
 
 
 @dataclass
-class XAIGet:
+class ProfileResetGet:
     label: str
     profile: Optional[int]
+    skip: Optional[int]
+
+    def __post_init__(self):
+        if self.skip is None or self.skip < 0:
+            self.skip = 0
+
+
+@dataclass
+class XAIGet:
+    label: str
+    profile: int
     skip: Optional[int]
 
     def __post_init__(self):

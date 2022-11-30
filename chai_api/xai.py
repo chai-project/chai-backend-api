@@ -11,7 +11,7 @@ from dacite import from_dict, DaciteError, Config
 from falcon import Request, Response
 
 from chai_api.db_definitions import Log, Profile, SetpointChange, get_home
-from chai_api.expected import XAIGet
+from chai_api.expected import XAIGet, ProfileResetGet
 from chai_api.responses import XAIRegion, XAIBand, XAIScatter, XAIScatterEntry
 
 
@@ -212,7 +212,7 @@ class ProfileResetResource:
 
     def on_get(self, req: Request, resp: Response):  # noqa
         try:
-            parameters: XAIGet = from_dict(XAIGet, req.params, config=Config(cast=[int]))
+            parameters: ProfileResetGet = from_dict(ProfileResetGet, req.params, config=Config(cast=[int]))
 
             if parameters.profile is not None and (parameters.profile < 1 or parameters.profile > 5):
                 resp.content_type = falcon.MEDIA_TEXT
