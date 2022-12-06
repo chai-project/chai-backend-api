@@ -33,10 +33,10 @@ def main(config: DBConfiguration, home_label: str):
             session.execute("DELETE FROM profile WHERE homeid=:homeid", {"homeid": homeid})
             session.execute("DELETE FROM schedule WHERE homeid=:homeid", {"homeid": homeid})
             session.execute("DELETE FROM setpointchange WHERE homeid=:homeid", {"homeid": homeid})
-            session.execute("DELETE FROM home WHERE homeid=:homeid", {"homeid": homeid})
+            session.execute("DELETE FROM home WHERE id=:homeid", {"homeid": homeid})
 
             session.execute("DELETE FROM netatmoreading WHERE netatmoid=:netatmoid", {"netatmoid": netatmoid})
-            session.execute("DELETE FROM netatmodevice WHERE netatmoid=:netatmoid", {"netatmoid": netatmoid})
+            session.execute("DELETE FROM netatmodevice WHERE id=:netatmoid", {"netatmoid": netatmoid})
 
             session.commit()
             print(f"Deleted {home_label} (homeid={homeid}, netatmoid={netatmoid})")
