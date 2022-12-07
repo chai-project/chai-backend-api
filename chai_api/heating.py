@@ -7,6 +7,7 @@ import shelve
 import sys
 from dataclasses import dataclass
 from typing import Optional
+from requests.exceptions import Timeout
 
 import click
 import falcon
@@ -369,8 +370,15 @@ class HeatingResource:
             # when the request is not hidden it is processed and its new status is immediately applied
             if not request.hidden:
                 heating_status = _get_heating_status(home.id, db_session, shelve_db=self.shelve_db)
-                _set_netatmo_heating(
-                    home.label, heating_status, db_session, home.relay, self.client_id, self.client_secret)
+                try:
+                    _set_netatmo_heating(
+                        home.label, heating_status, db_session, home.relay, self.client_id, self.client_secret
+                    )
+                except Timeout:
+                    resp.content_type = falcon.MEDIA_TEXT
+                    resp.status = falcon.HTTP_GATEWAY_TIMEOUT
+                    resp.text = f"unable to set the thermostat, the request timed out"
+
                 print("set Netatmo heating")
 
             resp.content_type = falcon.MEDIA_JSON
