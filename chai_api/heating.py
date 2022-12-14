@@ -257,7 +257,7 @@ class HeatingResource:
             ).filter(
                 NetatmoReading.netatmo_id == home.netatmoID
             ).filter(
-                NetatmoReading.room_id == 1  # cube temperature
+                NetatmoReading.room_id == 2  # T3 valve temperature
             ).order_by(
                 NetatmoReading.start.desc()
             ).first()
