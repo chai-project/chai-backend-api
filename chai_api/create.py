@@ -67,13 +67,6 @@ def main(config: DBConfiguration, refresh_token: str, home_label: str, bearer: s
 
             print("created schedules")
 
-            session.add(Log(
-                home_id=home_id,
-                timestamp=pendulum.now(),
-                category="WELCOME",
-                parameters=[home_label]
-            ))
-
             # call the API to make sure the profiles for this new user are set up correctly
             session.commit()
             for i in range(5):
@@ -84,6 +77,13 @@ def main(config: DBConfiguration, refresh_token: str, home_label: str, bearer: s
                 )
 
             print("reset profiles")
+
+            requests.put(
+                "http://localhost:8080/logs/",
+                params={"label": home_label, "timestamp": pendulum.now().to_iso8601_string(), "category": "WELCOME"},
+                headers={"Authorization": f"Bearer {bearer},{auth_token}"},
+                json={"parameters": [home_label]}
+            )
 
 
 @click.command()
