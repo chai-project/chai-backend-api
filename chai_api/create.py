@@ -6,7 +6,7 @@ import pendulum
 import requests
 import tomli
 
-from db_definitions import Configuration as DBConfiguration, db_engine_manager, db_session_manager
+from db_definitions import Configuration as DBConfiguration, db_engine_manager, db_session_manager, Log
 from utilities import create_user_token
 
 
@@ -66,6 +66,13 @@ def main(config: DBConfiguration, refresh_token: str, home_label: str, bearer: s
                 )
 
             print("created schedules")
+
+            session.add(Log(
+                home_id=home_id,
+                timestamp=pendulum.now(),
+                category="WELCOME",
+                parameters=[home_label]
+            ))
 
             # call the API to make sure the profiles for this new user are set up correctly
             session.commit()
