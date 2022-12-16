@@ -138,7 +138,7 @@ def cli(config, host, port, bearer_file, dbserver, db, username, dbpass_file, de
                         expected_profiles = int(toml_pushover.get("number", 0))
                         profiles = []
                         for index in range(expected_profiles):
-                            new_profile = ConfigurationProfile
+                            new_profile = ConfigurationProfile()
                             if profile := toml_pushover[f"{index + 1}"]:
                                 new_profile.mean1 = float(profile["mean1"])
                                 new_profile.mean2 = float(profile["mean2"])
