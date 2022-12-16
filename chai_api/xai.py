@@ -249,12 +249,14 @@ class ProfileResetResource:
                     correlation1=default_profile.correlation1, correlation2=default_profile.correlation2
                 )
                 db_session.add(new_profile)
-                db_session.add(Log(
-                    home_id=home.id,
-                    timestamp=pendulum.now(),
-                    category="PROFILE_RESET",
-                    parameters=[profile_id]
-                ))
+
+                if not parameters.hidden:
+                    db_session.add(Log(
+                        home_id=home.id,
+                        timestamp=pendulum.now(),
+                        category="PROFILE_RESET",
+                        parameters=[profile_id]
+                    ))
 
             db_session.commit()
         except DaciteError as err:

@@ -72,7 +72,7 @@ def main(config: DBConfiguration, refresh_token: str, home_label: str, bearer: s
             for i in range(5):
                 requests.get(
                     "http://localhost:8080/profile/reset/",
-                    params={"label": home_label, "profile": i + 1},
+                    params={"label": home_label, "profile": i + 1, "hidden": True},
                     headers={"Authorization": f"Bearer {bearer},{auth_token}"}
                 )
 

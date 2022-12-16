@@ -112,10 +112,13 @@ class ProfileResetGet:
     label: str
     profile: Optional[int]
     skip: Optional[int]
+    hidden: Optional[bool]
 
     def __post_init__(self):
         if self.skip is None or self.skip < 0:
             self.skip = 0
+        if self.hidden is None:
+            self.hidden = False
 
 
 @dataclass
