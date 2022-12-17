@@ -102,7 +102,7 @@ class XAIRegionResource(XAIProfileResource):
             parameters: XAIGet = from_dict(XAIGet, req.params, config=Config(cast=[int]))
             (success, result) = self.get_profile(req, resp, parameters)
 
-            if success and result is not None:
+            if success:
                 response = None
                 if result and result.confidence_region and len(result.confidence_region) == 3:
                     response = XAIRegion(
@@ -143,7 +143,7 @@ class XAIBandResource(XAIProfileResource):
             parameters: XAIGet = from_dict(XAIGet, req.params, config=Config(cast=[int]))
             (success, result) = self.get_profile(req, resp, parameters)
 
-            if success and result is not None:
+            if success:
                 response = None
                 if result and result.prediction_banded and len(result.prediction_banded) == 36:
                     band: List[List[float]] = list(zip(*result.prediction_banded))  # noqa
