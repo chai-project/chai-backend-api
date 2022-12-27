@@ -45,7 +45,7 @@ class PriceResource:
                 if request.limit is None:
                     request.end = request.start.add(days=1)
                 else:
-                    request.end = request.start.add(days=math.ceil(request.limit / 46))
+                    request.end = request.start.add(days=math.ceil(request.limit / 48))
 
             entries: [ElectricityPrice] = get_energy_values(request.start, request.end, request.limit, self.shelve_db)
 
