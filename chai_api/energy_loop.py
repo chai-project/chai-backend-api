@@ -1366,7 +1366,7 @@ def get_energy_values(start_date: pendulum.DateTime, end_date: pendulum.DateTime
         middle_date = start_date
         while middle_date.year < end_date.year:
             requests.append((middle_date, middle_date.end_of("year")))
-            middle_date = middle_date.set(middle_date.year + 1, 1, 1)
+            middle_date = middle_date.end_of("year").add(microseconds=1)
         requests.append((middle_date, end_date))
 
     result = [_get_values(start, end) for (start, end) in requests]
@@ -1533,6 +1533,10 @@ class EnergyLoopTests(unittest.TestCase):
     def testRecordsAfterDST(self):
         values = get_energy_values(pendulum.parse("2023-03-27T00:00"), pendulum.parse("2023-03-27T01:00"))
         self.assertEqual(len(values), 2)
+
+    def testYearLoopOnSecond(self):
+        values = get_energy_values(pendulum.parse("2022-12-31T10:00"), pendulum.parse("2023-01-01T00:00"))
+        self.assertEqual(len(values), 28)
 
 
 if __name__ == "__main__":
