@@ -72,18 +72,12 @@ class PricesGet:
 class LogsGet:
     label: str
     category: Optional[str]
-    start: Optional[DateTime]  # defaults to one week ago, or one week before end
+    start: Optional[DateTime]  # no defaults
     end: Optional[DateTime]
     limit: Optional[int]
     skip: Optional[int]
 
     def __post_init__(self):
-        if self.start is None:
-            if self.end is None:
-                self.start = DateTime.now("Europe/London").add(days=-7)
-            else:
-                self.start = self.end.add(days=-7)
-
         if self.limit is None:
             self.limit = 25
         elif self.limit < 0:

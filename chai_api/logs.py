@@ -33,11 +33,12 @@ class LogsResource:
                 Log
             ).filter(
                 Log.home_id == home.id
-            ).filter(
-                Log.timestamp >= request.start
             ).order_by(
                 Log.timestamp.desc()
             )
+
+            if request.start is not None:
+                query = query.filter(Log.timestamp >= request.start)
 
             if request.category is not None:
                 if "," in request.category:
