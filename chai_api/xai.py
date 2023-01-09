@@ -107,8 +107,8 @@ class XAIRegionResource(XAIProfileResource):
                 if result and result.confidence_region and len(result.confidence_region) == 3:
                     response = XAIRegion(
                         profile=result.profile_id, centre_x=result.mean1, centre_y=result.mean2,
-                        angle=result.confidence_region[0], height=result.confidence_region[1],
-                        width=result.confidence_region[2], skip=parameters.skip
+                        angle=result.confidence_region[0], width=result.confidence_region[1],
+                        height=result.confidence_region[2], skip=parameters.skip
                     )
 
                 resp.content_type = falcon.MEDIA_JSON
